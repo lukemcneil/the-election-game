@@ -8,9 +8,9 @@ const util = require('util')
 let currentRound = 0;
 
 // create game
-app.put('/api/v1/game/:id', (req, res) => {
-    let check = false;
-    games.map((game) => {
+app.put('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, res: any) => {
+    let check: boolean = false;
+    games.map((game: Game) => {
         if (game.id == req.params.id) {
             res.status(409);
             console.log('A game with the specified game id already exists');
@@ -19,7 +19,8 @@ app.put('/api/v1/game/:id', (req, res) => {
     })
     if (!check) {
         let madeGame = makeGame(req.params.id);
-        addPlayerToGame(req.body.player, madeGame.id)
+        console.log(req.body);
+        addPlayerToGame(req.body, madeGame.id)
         console.log(util.inspect(madeGame, { depth: null }))
         res.status(201);
         console.log('Successfully created the game');
@@ -28,20 +29,21 @@ app.put('/api/v1/game/:id', (req, res) => {
 })
 
 // add player
-app.post('/api/v1/game/:id', (req, res) => {
-    let matchingGame = games.find((game) => {
+app.post('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, res: any) => {
+    let matchingGame: Game | undefined = games.find((game: Game) => {
         return game.id == req.params.id;
     })
     if (!matchingGame) {
         res.status(404);
         console.log('A game with the specified game id does not exist');
+        res.send();
         return;
     }
-    let matchingPlayer = matchingGame.players.find((player) => {
-        return player == req.body.player;
+    let matchingPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
+        return player == req.body;
     })
-    if (matchingPlayer == undefined) {
-        addPlayerToGame(req.body.player, req.params.id)
+    if (!matchingPlayer) {
+        addPlayerToGame(req.body, req.params.id)
         res.status(200);
         console.log('Successfully joined the game');
         console.log(util.inspect(matchingGame, { depth: null }))
@@ -53,8 +55,8 @@ app.post('/api/v1/game/:id', (req, res) => {
 })
 
 // get game data
-app.get('/api/v1/game/:id', (req, res) => {
-    let matchingGame = games.find((game) => {
+app.get('/api/v1/game/:id', (req: { params: { id: number; }; }, res: any) => {
+    let matchingGame: Game | undefined = games.find((game: Game) => {
         return game.id == req.params.id;
     })
     if (!matchingGame) {
@@ -69,8 +71,8 @@ app.get('/api/v1/game/:id', (req, res) => {
 })
 
 //  submit answer
-app.post('/api/v1/game/:id/answer', (req, res) => {
-    let matchingGame = games.find((game) => {
+app.post('/api/v1/game/:id/answer', (req: { params: { id: number; }; body: Answer; }, res: any) => {
+    let matchingGame: Game | undefined = games.find((game: Game) => {
         return game.id == req.params.id;
     })
     if (!matchingGame) {
@@ -79,8 +81,8 @@ app.post('/api/v1/game/:id/answer', (req, res) => {
         res.send();
         return;
     }
-    let foundPlayer = matchingGame.players.find((player) => {
-        return player == req.body.player;
+    let foundPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
+        return player.name == req.body.player.name;
     })
     if (!foundPlayer) {
         res.status(404);
@@ -88,7 +90,7 @@ app.post('/api/v1/game/:id/answer', (req, res) => {
         res.send();
         return;
     }
-    let previousAnswer = matchingGame.rounds[currentRound].answers.find((answer) => {
+    let previousAnswer: Answer | undefined = matchingGame.rounds[currentRound].answers.find((answer: Answer) => {
         return answer.player == req.body.player;
     })
     if (!previousAnswer) {
@@ -100,13 +102,12 @@ app.post('/api/v1/game/:id/answer', (req, res) => {
         res.status(209);
         console.log("player already submitted an answer");
     }
-
     res.send();
 })
 
 // submit guesses
-app.post('/api/v1/game/:id/guess', (req, res) => {
-    let matchingGame = games.find((game) => {
+app.post('/api/v1/game/:id/guess', (req: { params: { id: number; }; body: Guess; }, res: any) => {
+    let matchingGame: Game | undefined = games.find((game: Game) => {
         return game.id == req.params.id;
     })
     if (!matchingGame) {
@@ -115,8 +116,8 @@ app.post('/api/v1/game/:id/guess', (req, res) => {
         res.send();
         return;
     }
-    let foundPlayer = matchingGame.players.find((player) => {
-        return player == req.body.player;
+    let foundPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
+        return player.name == req.body.player.name;
     })
     if (!foundPlayer) {
         res.status(404);
@@ -124,7 +125,7 @@ app.post('/api/v1/game/:id/guess', (req, res) => {
         res.send();
         return;
     }
-    let previousGuess = matchingGame.rounds[currentRound].guesses.find((guess) => {
+    let previousGuess: Guess | undefined = matchingGame.rounds[currentRound].guesses.find((guess: Guess) => {
         return guess.player == req.body.player;
     })
     if (!previousGuess) {
@@ -140,8 +141,8 @@ app.post('/api/v1/game/:id/guess', (req, res) => {
 })
 
 // remove player
-app.delete('/api/v1/game/:id', (req, res) => {
-    let matchingGame = games.find((game) => {
+app.delete('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, res: any) => {
+    let matchingGame: Game | undefined = games.find((game: Game) => {
         return game.id == req.params.id;
     })
     if (!matchingGame) {
@@ -150,16 +151,16 @@ app.delete('/api/v1/game/:id', (req, res) => {
         res.send();
         return;
     }
-    let matchingPlayer = matchingGame.players.find((player) => {
-        return player == req.body.player;
+    let matchingPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
+        return player.name == req.body.name;
     })
     if (matchingPlayer) {
-        removePlayerFromGame(req.body.player, req.params.id);
-        matchingGame.rounds[currentRound].answers = matchingGame.rounds[currentRound].answers.filter((answer) => {
-            return answer.player != req.body.player;
+        removePlayerFromGame(req.body.name, req.params.id);
+        matchingGame.rounds[currentRound].answers = matchingGame.rounds[currentRound].answers.filter((answer: Answer) => {
+            return answer.player.name != req.body.name;
         })
-        matchingGame.rounds[currentRound].guesses = matchingGame.rounds[currentRound].guesses.filter((guess) => {
-            return guess.player != req.body.player;
+        matchingGame.rounds[currentRound].guesses = matchingGame.rounds[currentRound].guesses.filter((guess: Guess) => {
+            return guess.player.name != req.body.name;
         })
         res.status(200);
         console.log('Successfully removed the player from the game');
@@ -173,10 +174,10 @@ app.delete('/api/v1/game/:id', (req, res) => {
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
-let games = [];
+let games: Game[] = [];
 
-function makeGame(gameId) {
-    let game = {
+function makeGame(gameId: any): Game {
+    let game: Game = {
         id: gameId,
         players: [],
         rounds: [{
@@ -189,18 +190,51 @@ function makeGame(gameId) {
     return game;
 }
 
-function addPlayerToGame(player, gameId) {
+function addPlayerToGame(player: Player, gameId: any): boolean {
     let foundGame = games.find((game) => {
         return game.id == gameId;
     });
-    foundGame.players.push(player);
+    if (foundGame) {
+        console.log(player)
+        foundGame.players.push(player);
+        return true;
+    }
+    return false;
 }
 
-function removePlayerFromGame(p, gameId) {
-    let foundGame = games.find((game) => {
+function removePlayerFromGame(p: String, gameId: any): boolean {
+    let foundGame: undefined | Game = games.find((game) => {
         return game.id == gameId;
     })
-    foundGame.players = foundGame.players.filter((player) => {
-        return player != p;
-    })
+    if (foundGame) {
+        foundGame.players = foundGame.players.filter((player: Player) => {
+            return player.name != p;
+        })
+        return true;
+    }
+    return false;
+}
+interface Player {
+    name: String;
+}
+
+interface Answer {
+    player: Player;
+    answer: String;
+}
+
+interface Guess {
+    player: Player;
+    answers: Answer[];
+}
+
+interface Round {
+    question: String;
+    answers: Answer[];
+    guesses: Guess[];
+}
+interface Game {
+    id: number;
+    players: Player[];
+    rounds: Round[];
 }
