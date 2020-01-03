@@ -1,0 +1,16 @@
+[package]
+name = "weighty-inquiry"
+version = "0.1.0"
+authors = ["David McNeil <mcneil.david2@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+parking_lot = "0.10.0"
+rand = "0.7.2"
+rocket = "0.4.2"
+rocket_contrib = "0.4.2"
+serde = { version = "1.0.104", features = ["derive"] }
+serde_json = "1.0.44"
+structopt = "0.3.7"
