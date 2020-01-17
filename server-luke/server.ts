@@ -1,11 +1,10 @@
 const express = require('express')
 const app = express()
 const port = 3000
+var cors = require('cors');
 app.use(express.json());
 const util = require('util')
-
-// TODO: store current round somewhere
-let currentRound = 0;
+app.use(cors());
 
 // create game
 app.put('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, res: any) => {
@@ -20,7 +19,7 @@ app.put('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, re
     if (!check) {
         let madeGame = makeGame(req.params.id);
         console.log(req.body);
-        addPlayerToGame(req.body, madeGame.id)
+        addPlayerToGame(req.body.player, madeGame.id)
         console.log(util.inspect(madeGame, { depth: null }))
         res.status(201);
         console.log('Successfully created the game');
@@ -39,11 +38,11 @@ app.post('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; }, r
         res.send();
         return;
     }
-    let matchingPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
-        return player == req.body;
+    let matchingPlayer: String | undefined = matchingGame.players.find((player: String) => {
+        return player == req.body.player;
     })
     if (!matchingPlayer) {
-        addPlayerToGame(req.body, req.params.id)
+        addPlayerToGame(req.body.player, req.params.id)
         res.status(200);
         console.log('Successfully joined the game');
         console.log(util.inspect(matchingGame, { depth: null }))
@@ -67,7 +66,15 @@ app.get('/api/v1/game/:id', (req: { params: { id: number; }; }, res: any) => {
     }
     console.log(util.inspect(matchingGame, { depth: null }))
     res.status(200);
-    res.json(matchingGame);
+    let result: Game = {
+        id: matchingGame.id,
+        phase: matchingGame.phase,
+        players: matchingGame.players,
+        rounds: matchingGame.rounds,
+    }
+    delete result.id;
+    delete result.phase;
+    res.json(result);
 })
 
 //  submit answer
@@ -81,8 +88,14 @@ app.post('/api/v1/game/:id/answer', (req: { params: { id: number; }; body: Answe
         res.send();
         return;
     }
-    let foundPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
-        return player.name == req.body.player.name;
+    if (matchingGame.phase != "answer") {
+        console.log("not in answering phase");
+        res.status(404);
+        res.send();
+        return;
+    }
+    let foundPlayer: String | undefined = matchingGame.players.find((player: String) => {
+        return player == req.body.player;
     })
     if (!foundPlayer) {
         res.status(404);
@@ -90,17 +103,22 @@ app.post('/api/v1/game/:id/answer', (req: { params: { id: number; }; body: Answe
         res.send();
         return;
     }
-    let previousAnswer: Answer | undefined = matchingGame.rounds[currentRound].answers.find((answer: Answer) => {
+    let previousAnswer: Answer | undefined = matchingGame.rounds[matchingGame.rounds.length - 1].answers.find((answer: Answer) => {
         return answer.player == req.body.player;
     })
     if (!previousAnswer) {
-        matchingGame.rounds[currentRound].answers.push(req.body);
+        matchingGame.rounds[matchingGame.rounds.length - 1].answers.push(req.body);
         console.log(util.inspect(matchingGame, { depth: null }))
         res.status(200);
         console.log("Successfully submitted the answer")
+        if (matchingGame.rounds[matchingGame.rounds.length - 1].answers.length == matchingGame.players.length) {
+            matchingGame.phase = "guess";
+            console.log("entering guessing phase");
+        }
     } else {
-        res.status(209);
-        console.log("player already submitted an answer");
+        res.status(200);
+        previousAnswer.answer = req.body.answer;
+        console.log("updated answer");
     }
     res.send();
 })
@@ -116,8 +134,14 @@ app.post('/api/v1/game/:id/guess', (req: { params: { id: number; }; body: Guess;
         res.send();
         return;
     }
-    let foundPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
-        return player.name == req.body.player.name;
+    if (matchingGame.phase != "guess") {
+        console.log("not in guessing phase");
+        res.status(404);
+        res.send();
+        return;
+    }
+    let foundPlayer: String | undefined = matchingGame.players.find((player: String) => {
+        return player == req.body.player;
     })
     if (!foundPlayer) {
         res.status(404);
@@ -125,11 +149,45 @@ app.post('/api/v1/game/:id/guess', (req: { params: { id: number; }; body: Guess;
         res.send();
         return;
     }
-    let previousGuess: Guess | undefined = matchingGame.rounds[currentRound].guesses.find((guess: Guess) => {
+    let previousGuess: Guess | undefined = matchingGame.rounds[matchingGame.rounds.length - 1].guesses.find((guess: Guess) => {
         return guess.player == req.body.player;
     })
     if (!previousGuess) {
-        matchingGame.rounds[currentRound].guesses.push(req.body);
+        let listOfNamesGuessed: String[] = [];
+        req.body.answers.forEach((answer) => listOfNamesGuessed.push(answer.player));
+
+        if (listOfNamesGuessed.includes(req.body.player)) {
+            console.log("cannot guess yourself");
+            res.status(209);
+            res.send();
+            return;
+        };
+
+        let validity: boolean = true;
+        matchingGame.players.forEach((player) => {
+            if (matchingGame != undefined) {
+                if ((!listOfNamesGuessed.includes(player) && player != req.body.player) || listOfNamesGuessed.length != matchingGame.players.length - 1) {
+                    console.log("you need to make a guess for every other player");
+                    res.status(209);
+                    res.send();
+                    validity = false;
+                }
+            }
+        })
+        if (!validity) {
+            return;
+        }
+
+        matchingGame.rounds[matchingGame.rounds.length - 1].guesses.push(req.body);
+        if (matchingGame.rounds[matchingGame.rounds.length - 1].guesses.length == matchingGame.players.length) {
+            matchingGame.rounds.push({
+                question: "Answer the question you would have liked to be asked?",
+                answers: [],
+                guesses: []
+            });
+            matchingGame.phase = "answer";
+            console.log("everyone guessed");
+        }
         console.log(util.inspect(matchingGame, { depth: null }))
         res.status(200);
         console.log("Successfully submitted the guesses")
@@ -151,16 +209,16 @@ app.delete('/api/v1/game/:id', (req: { params: { id: number; }; body: Player; },
         res.send();
         return;
     }
-    let matchingPlayer: Player | undefined = matchingGame.players.find((player: Player) => {
-        return player.name == req.body.name;
+    let matchingPlayer: String | undefined = matchingGame.players.find((player: String) => {
+        return player == req.body.player;
     })
     if (matchingPlayer) {
-        removePlayerFromGame(req.body.name, req.params.id);
-        matchingGame.rounds[currentRound].answers = matchingGame.rounds[currentRound].answers.filter((answer: Answer) => {
-            return answer.player.name != req.body.name;
+        removePlayerFromGame(req.body.player, req.params.id);
+        matchingGame.rounds[matchingGame.rounds.length - 1].answers = matchingGame.rounds[matchingGame.rounds.length - 1].answers.filter((answer: Answer) => {
+            return answer.player != req.body.player;
         })
-        matchingGame.rounds[currentRound].guesses = matchingGame.rounds[currentRound].guesses.filter((guess: Guess) => {
-            return guess.player.name != req.body.name;
+        matchingGame.rounds[matchingGame.rounds.length - 1].guesses = matchingGame.rounds[matchingGame.rounds.length - 1].guesses.filter((guess: Guess) => {
+            return guess.player != req.body.player;
         })
         res.status(200);
         console.log('Successfully removed the player from the game');
@@ -179,9 +237,10 @@ let games: Game[] = [];
 function makeGame(gameId: any): Game {
     let game: Game = {
         id: gameId,
+        phase: "answer",
         players: [],
         rounds: [{
-            question: "example question",
+            question: "Answer the question you would have liked to be asked?",
             answers: [],
             guesses: []
         }]
@@ -190,7 +249,8 @@ function makeGame(gameId: any): Game {
     return game;
 }
 
-function addPlayerToGame(player: Player, gameId: any): boolean {
+function addPlayerToGame(player: String, gameId: any): boolean {
+    // TODO: make this not break phase of foundGame
     let foundGame = games.find((game) => {
         return game.id == gameId;
     });
@@ -207,24 +267,24 @@ function removePlayerFromGame(p: String, gameId: any): boolean {
         return game.id == gameId;
     })
     if (foundGame) {
-        foundGame.players = foundGame.players.filter((player: Player) => {
-            return player.name != p;
+        foundGame.players = foundGame.players.filter((player: String) => {
+            return player != p;
         })
         return true;
     }
     return false;
 }
 interface Player {
-    name: String;
+    player: String;
 }
 
 interface Answer {
-    player: Player;
+    player: String;
     answer: String;
 }
 
 interface Guess {
-    player: Player;
+    player: String;
     answers: Answer[];
 }
 
@@ -234,7 +294,8 @@ interface Round {
     guesses: Guess[];
 }
 interface Game {
+    phase: "answer" | "guess" | "done";
     id: number;
-    players: Player[];
+    players: String[];
     rounds: Round[];
 }
