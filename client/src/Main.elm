@@ -1,9 +1,13 @@
 module Main exposing (main)
+
 import Browser
-import Html exposing (Html, text, button, div, pre)
-import Http
+import Html exposing (Html, button, div, h1, text, pre, ul,li)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 
+import Http
+import Json.Decode exposing (..)
+import Debug as Debug
 
 
 -- MAIN
@@ -21,20 +25,18 @@ main =
 
 -- MODEL
 
-
 type Model
-  = Failure
-  | Loading
-  | Success String
+  = None
+    | Failure
+    | Loading
+    | Success String
+    | HasData GameState
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Loading
-  , Http.get
-      { url = "wrong website"
-      , expect = Http.expectString GotText
-      }
+  (None,
+   Cmd.none
   )
 
 
@@ -43,25 +45,25 @@ init _ =
 
 
 type Msg
-  = GotText (Result Http.Error String)
-  | GetText
+  =
+  GetData
+  | GotGameData (Result Http.Error GameState)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GotText result ->
+
+    GetData ->
+      (Loading, getGameData)
+
+    GotGameData result ->
       case result of
-        Ok fullText ->
-          (Success fullText, Cmd.none)
+        Ok data ->
+          (HasData data, Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)
-    GetText ->
-      (Failure, Http.get
-      { url = "http://localhost:3000/api/v1/game/5"
-      , expect = Http.expectString GotText
-      })
 
 
 
@@ -82,17 +84,104 @@ view model =
   case model of
     Failure ->
       div [] [
-        button [onClick GetText]
+        button [onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"]
       [ text "get game data" ],
-        pre [] [ text "I was unable to load your book."]
-      ]
+        pre [] [ text "I was unable to load your book."]]
 
     Loading ->
       text "Loading..."
 
     Success fullText ->
       div [] [
-        button [onClick GetText]
-      [ text "get game data" ],
+        button [onClick GetData,class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"]
+      [ text "get new game data" ],
         pre [] [text fullText]
       ]
+
+    None ->
+      button [onClick GetData,class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"]
+      [ text "get game data" ]
+
+    HasData data ->
+      div [] [
+        button [onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"]
+      [ text "get new game data" ],
+        h1 [ class "text-4xl"] [text  "Players: "],
+        ul []
+        (List.map (\l -> li [] [ text ("-" ++ l) ]) data.players),
+        h1 [class "text-4xl"] [text  "Rounds: "],
+        ul []
+        (List.map (\l -> div [] [
+          pre [] [ text ("Question: " ++l.question) ],
+          pre [] [ text ("Answers: ")],
+          div [] (List.map (\l1 -> li [] [ text ("-" ++ l1.player++ ": "++ l1.answer) ]) l.answers),
+          pre [] [ text ("Guesses: ")],
+          div [] (List.map (\l2 -> div [] [
+            li [] [ text ("-" ++l2.player++"'s guesses")],
+            div [] (List.map (\l3 -> li [] [ text ("----" ++ l3.player++ ": "++ l3.answer) ]) l2.answers)
+            ]) l.guesses),
+          div [] [text "--------------------------------------------"]
+        ]) data.rounds)
+      ]
+
+type alias Round =
+  {
+    question: String,
+    answers: List Answer,
+    guesses: List Guess
+  }
+
+type alias Answer =
+  {
+    player: String,
+    answer: String
+  }
+
+type alias Guess =
+  {
+    player: String,
+    answers: List Answer
+  }
+
+type alias GameState = 
+  {
+    players: (List String),
+    rounds: (List Round)
+  }
+
+getGameData : Cmd Msg
+getGameData = 
+  Http.get
+      { url = "http://localhost:3000/api/v1/game/5"
+      , expect = Http.expectJson GotGameData decoder
+      }
+
+decoder : Decoder GameState
+decoder =
+  map2
+    GameState
+      (field "players" (list string))
+      (field "rounds" (list roundDecoder))
+
+roundDecoder : Decoder Round
+roundDecoder = 
+  map3
+    Round
+      (field "question" string)
+      (field "answers" (list answerDecoder))
+      (field "guesses" (list guessDecoder))
+
+answerDecoder : Decoder Answer
+answerDecoder = 
+  map2
+    Answer
+      (field "player" string)
+      (field "answer" string)
+
+guessDecoder : Decoder Guess
+guessDecoder = 
+  map2
+    Guess
+      (field "player" string)
+      (field "answers" (list answerDecoder))
+      
