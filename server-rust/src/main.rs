@@ -12,7 +12,7 @@ use rocket::{
     config::{Environment, LoggingLevel},
     delete, get, post, put, routes, Config, State,
 };
-use rocket_contrib::json::Json;
+use rocket_contrib::{json::Json, serve::StaticFiles};
 use std::path::PathBuf;
 use structopt::StructOpt;
 use types::{Answer, Game, Guess, PlayerData, Result};
@@ -20,11 +20,11 @@ use types::{Answer, Game, Guess, PlayerData, Result};
 type Games = Mutex<types::Games>;
 type Questions = Mutex<QuestionLookup>;
 
-#[get("/")]
-fn index() -> &'static str {
-    // TODO: This will eventually return the client
-    "html"
-}
+// #[get("/")]
+// fn index() -> &'static str {
+//     // TODO: Is there some way to use StaticFiles from up here?
+//     "HTML"
+// }
 
 #[get("/heartbeat")]
 fn heartbeat() -> &'static str {
@@ -121,7 +121,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
         rocket::ignite()
     };
     rocket
-        .mount("/", routes![index])
+        .mount("/", StaticFiles::from("../client/"))
         .mount(
             "/api/v1",
             routes![
