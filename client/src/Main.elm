@@ -152,7 +152,7 @@ type alias GameState =
 getGameData : Cmd Msg
 getGameData = 
   Http.get
-      { url = "http://localhost:3000/api/v1/game/5"
+      { url = "http://localhost:8172/api/v1/game/5"
       , expect = Http.expectJson GotGameData decoder
       }
 
