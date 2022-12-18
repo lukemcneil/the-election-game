@@ -7,12 +7,14 @@ mod types;
 
 use parking_lot::Mutex;
 use question_lookup::QuestionLookup;
+use rocket::http::Method;
 use rocket::{
     self,
     config::{Environment, LoggingLevel},
     delete, get, post, put, routes, Config, State,
 };
 use rocket_contrib::{json::Json, serve::StaticFiles};
+use rocket_cors::{AllowedOrigins, CorsOptions};
 use std::path::PathBuf;
 use structopt::StructOpt;
 use types::{Answer, Game, Guess, PlayerData, Result};
@@ -120,7 +122,19 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     } else {
         rocket::ignite()
     };
+    let cors = CorsOptions::default()
+        .allowed_origins(AllowedOrigins::all())
+        .allowed_methods(
+            vec![Method::Get, Method::Post, Method::Patch, Method::Put]
+                .into_iter()
+                .map(From::from)
+                .collect(),
+        )
+        .allow_credentials(true);
+
+    rocket::ignite().attach(cors.to_cors().unwrap());
     rocket
+        .attach(cors.to_cors().unwrap())
         .mount("/", StaticFiles::from("../client/"))
         .mount(
             "/api/v1",

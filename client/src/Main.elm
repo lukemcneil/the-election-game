@@ -68,7 +68,7 @@ update msg model =
                     ( Failure, Cmd.none )
 
         MadeGame _ ->
-            ( model, Cmd.none )
+            ( model, getGameData )
 
 
 
