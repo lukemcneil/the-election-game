@@ -75,7 +75,7 @@ type Msg
     | UpdateCurrentAnswer String
     | SubmitAnswer
     | SubmittedAnswer (Result Http.Error ())
-    | SubmitGuess
+    | AddToGuess String String
     | SubmittedGuess (Result Http.Error ())
     | ContinueToNextRound
 
@@ -133,10 +133,18 @@ update msg model =
                 ( model, submitAnswer model )
 
         SubmittedAnswer result ->
-            ( { model | phase = GuessPhase, currentAnswer = "" }, getGameData model )
+            ( { model | phase = GuessPhase, currentAnswer = "", currentGuess = [] }, getGameData model )
 
-        SubmitGuess ->
-            ( model, submitGuess model )
+        AddToGuess player answer ->
+            let
+                newModel =
+                    { model | currentGuess = Answer player answer :: model.currentGuess }
+            in
+            if List.length newModel.currentGuess == List.length model.gameState.players - 1 then
+                ( newModel, submitGuess newModel )
+
+            else
+                ( newModel, Cmd.none )
 
         SubmittedGuess result ->
             ( { model | phase = ShowResultsPhase }, getGameData model )
@@ -197,7 +205,17 @@ playerList : Model -> Html Msg
 playerList model =
     div []
         [ h3 [] [ text "Players" ]
-        , div [] (List.map (\player -> li [] [ text player ]) model.gameState.players)
+        , ul []
+            (List.map
+                (\player ->
+                    if player == model.name then
+                        div [] []
+
+                    else
+                        li [] [ text player ]
+                )
+                model.gameState.players
+            )
         ]
 
 
@@ -236,16 +254,33 @@ answersAndGuessForm model =
                      , h3 [] [ text "Other Answers" ]
                      ]
                         ++ (if List.length round.answers == List.length model.gameState.players then
-                                List.map
-                                    (\answer ->
-                                        if answer.player == model.name then
-                                            text ""
+                                [ ul []
+                                    (List.map
+                                        (\answer ->
+                                            if answer.player == model.name then
+                                                text ""
 
-                                        else
-                                            li [] [ text answer.answer ]
+                                            else
+                                                li [] [ text answer.answer ]
+                                        )
+                                        round.answers
                                     )
-                                    round.answers
-                                    ++ [ button [ onClick SubmitGuess ] [ text "Submit Guess" ] ]
+                                , h3 [] [ text "Who gave this answer?" ]
+                                , let
+                                    guess =
+                                        getNth (List.length model.currentGuess) (List.filter (\ans -> not <| ans.player == model.name) round.answers)
+                                  in
+                                  case guess of
+                                    Just g ->
+                                        div []
+                                            (div [] [ text g.answer ]
+                                                :: List.map (\player -> button [ onClick <| AddToGuess player g.answer ] [ text player ])
+                                                    (List.filter (\p -> not <| p == model.name || alreadyGuessedPlayer model.currentGuess p) model.gameState.players)
+                                            )
+
+                                    Nothing ->
+                                        text ""
+                                ]
 
                             else
                                 [ text "waiting for everyone to submit their answers" ]
@@ -253,6 +288,20 @@ answersAndGuessForm model =
                         ++ [ playerList model ]
                     )
         ]
+
+
+alreadyGuessedPlayer : List Answer -> String -> Bool
+alreadyGuessedPlayer guesses player =
+    case guesses of
+        [] ->
+            False
+
+        h :: t ->
+            if h.player == player then
+                True
+
+            else
+                alreadyGuessedPlayer t player
 
 
 getNth : Int -> List a -> Maybe a
@@ -280,8 +329,41 @@ resultsPage model =
             div []
                 (case getNth 1 (List.reverse model.gameState.rounds) of
                     Just round ->
-                        List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) round.answers
-                            ++ [ button [ onClick ContinueToNextRound ] [ text "Next Round" ] ]
+                        let
+                            realAnswers =
+                                List.filter (\ans -> not <| ans.player == model.name) round.answers
+                        in
+                        [ h3 [] [ text "Your Answers" ]
+                        , div [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) model.currentGuess)
+                        , h3 [] [ text "Real Answers" ]
+                        , div [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) realAnswers)
+                        , h3 [] [ text "Points This Round" ]
+                        , ul [] <|
+                            List.map
+                                (\player ->
+                                    li []
+                                        [ text
+                                            (player
+                                                ++ " - "
+                                                ++ fromInt
+                                                    (getTotalScoreForPlayer
+                                                        (case getNth 1 (List.reverse model.gameState.rounds) of
+                                                            Nothing ->
+                                                                []
+
+                                                            Just lastRound ->
+                                                                [ lastRound ]
+                                                        )
+                                                        player
+                                                    )
+                                            )
+                                        ]
+                                )
+                                model.gameState.players
+                        , h3 [] [ text "Total Points" ]
+                        , ul [] <| List.map (\player -> li [] [ text (player ++ " - " ++ fromInt (getTotalScoreForPlayer model.gameState.rounds player)) ]) model.gameState.players
+                        , button [ onClick ContinueToNextRound ] [ text "Next Round" ]
+                        ]
 
                     Nothing ->
                         []
@@ -289,9 +371,51 @@ resultsPage model =
         ]
 
 
+getTotalScoreForPlayer : List Round -> String -> Int
+getTotalScoreForPlayer rounds player =
+    case rounds of
+        [] ->
+            0
+
+        round :: rest ->
+            let
+                scoreThisRound =
+                    countScore round.answers (getGuess round.guesses player)
+            in
+            scoreThisRound + getTotalScoreForPlayer rest player
+
+
+getGuess : List Guess -> String -> List Answer
+getGuess guesses player =
+    case guesses of
+        [] ->
+            []
+
+        h :: t ->
+            if h.player == player then
+                h.answers
+
+            else
+                getGuess t player
+
+
+countScore : List Answer -> List Answer -> Int
+countScore ans1 ans2 =
+    case ans1 of
+        h :: t ->
+            if List.member h ans2 then
+                1 + countScore t ans2
+
+            else
+                countScore t ans2
+
+        _ ->
+            0
+
+
 roundNumber : Model -> Html Msg
 roundNumber model =
-    h1 [] [ text <| "Round " ++ fromInt (List.length model.gameState.rounds) ]
+    h1 [] [ text <| "Round " ++ fromInt model.currentRound ]
 
 
 type alias Round =
