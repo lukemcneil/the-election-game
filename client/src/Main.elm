@@ -1,14 +1,14 @@
 module Main exposing (main)
 
 import Browser
-import Debug as Debug
-import Dict exposing (Dict)
-import Html exposing (Html, button, div, h1, li, pre, text, ul)
-import Html.Attributes exposing (class, id)
-import Html.Events exposing (onClick)
-import Http
+import Html exposing (Html, b, button, div, h1, h3, input, li, ol, option, pre, text, ul)
+import Html.Attributes exposing (class, placeholder, type_)
+import Html.Events exposing (onClick, onInput)
+import Http exposing (emptyBody)
 import Json.Decode exposing (..)
 import Json.Encode
+import String exposing (fromInt)
+import Time
 
 
 
@@ -28,18 +28,34 @@ main =
 -- MODEL
 
 
-type Model
-    = None
-    | Failure
-    | Loading
-    | Success String
-    | HasData GameState
+type Phase
+    = JoinPhase String
+    | AnswerPhase
+    | GuessPhase
+    | ShowResultsPhase
+
+
+type alias Model =
+    { name : String
+    , gameName : String
+    , phase : Phase
+    , gameState : GameState
+    , currentAnswer : String
+    , currentGuess : List Answer
+    , currentRound : Int
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( None
-    , createGame
+    ( Model ""
+        ""
+        (JoinPhase "Please enter your name and the name of the game you would like to join.")
+        { players = [], rounds = [] }
+        ""
+        []
+        1
+    , Cmd.none
     )
 
 
@@ -48,27 +64,85 @@ init _ =
 
 
 type Msg
-    = GetData
+    = Tick
+    | GetGameData
     | GotGameData (Result Http.Error GameState)
-    | MadeGame (Result Http.Error {})
+    | JoinGame
+    | MakeGame
+    | JoinedGame (Result Http.Error ())
+    | UpdateName String
+    | UpdateGameName String
+    | UpdateCurrentAnswer String
+    | SubmitAnswer
+    | SubmittedAnswer (Result Http.Error ())
+    | SubmitGuess
+    | SubmittedGuess (Result Http.Error ())
+    | ContinueToNextRound
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetData ->
-            ( Loading, getGameData )
+        Tick ->
+            case model.phase of
+                JoinPhase _ ->
+                    ( model, Cmd.none )
+
+                _ ->
+                    ( model, getGameData model )
+
+        GetGameData ->
+            ( model, getGameData model )
 
         GotGameData result ->
             case result of
                 Ok data ->
-                    ( HasData data, Cmd.none )
+                    ( { model | gameState = data }, Cmd.none )
 
                 Err _ ->
-                    ( Failure, Cmd.none )
+                    ( model, Cmd.none )
 
-        MadeGame _ ->
-            ( model, getGameData )
+        MakeGame ->
+            ( model, createGame model )
+
+        JoinGame ->
+            ( model, joinGame model )
+
+        JoinedGame result ->
+            case result of
+                Ok data ->
+                    ( { model | phase = AnswerPhase }, getGameData model )
+
+                Err x ->
+                    ( { model | phase = JoinPhase "Failed to join game, try again." }, Cmd.none )
+
+        UpdateName newName ->
+            ( { model | name = newName }, Cmd.none )
+
+        UpdateGameName gameName ->
+            ( { model | gameName = gameName }, Cmd.none )
+
+        UpdateCurrentAnswer newAnswer ->
+            ( { model | currentAnswer = newAnswer }, Cmd.none )
+
+        SubmitAnswer ->
+            if model.currentAnswer == "" then
+                ( model, Cmd.none )
+
+            else
+                ( model, submitAnswer model )
+
+        SubmittedAnswer result ->
+            ( { model | phase = GuessPhase, currentAnswer = "" }, getGameData model )
+
+        SubmitGuess ->
+            ( model, submitGuess model )
+
+        SubmittedGuess result ->
+            ( { model | phase = ShowResultsPhase }, getGameData model )
+
+        ContinueToNextRound ->
+            ( { model | phase = AnswerPhase, currentRound = List.length model.gameState.rounds }, Cmd.none )
 
 
 
@@ -77,7 +151,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Time.every 1000 (\_ -> Tick)
 
 
 
@@ -86,60 +160,138 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case model of
-        Failure ->
+    case model.phase of
+        JoinPhase joinMessage ->
             div []
-                [ button [ onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" ]
-                    [ text "get game data" ]
-                , pre [] [ text "I was unable to load your book." ]
+                [ h1 [] [ text "Weighty Inquiry" ]
+                , div [] [ text joinMessage ]
+                , input [ type_ "text", placeholder "Player Name", Html.Attributes.value model.name, onInput UpdateName ] []
+                , input [ type_ "text", placeholder "Game Room Name", Html.Attributes.value model.gameName, onInput UpdateGameName ] []
+                , div []
+                    [ button [ onClick MakeGame ] [ text "Create Game" ]
+                    , button [ onClick JoinGame ] [ text "Join Game" ]
+                    ]
                 ]
 
-        Loading ->
-            text "Loading..."
-
-        Success fullText ->
+        AnswerPhase ->
             div []
-                [ button [ onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" ]
-                    [ text "get new game data" ]
-                , pre [] [ text fullText ]
+                [ roundNumber model
+                , questionAndAnswerForm model
+                , playerList model
                 ]
 
-        None ->
-            button [ onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" ]
-                [ text "get game data" ]
-
-        HasData data ->
+        GuessPhase ->
             div []
-                [ button [ onClick GetData, class "bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" ]
-                    [ text "get new game data" ]
-                , h1 [ class "text-4xl" ] [ text "Players: " ]
-                , ul []
-                    (List.map (\l -> li [] [ text ("-" ++ l) ]) data.players)
-                , h1 [ class "text-4xl" ] [ text "Rounds: " ]
-                , ul []
-                    (List.map
-                        (\l ->
-                            div []
-                                [ pre [] [ text ("Question: " ++ l.question) ]
-                                , pre [] [ text "Answers: " ]
-                                , div [] (List.map (\l1 -> li [] [ text ("-" ++ l1.player ++ ": " ++ l1.answer) ]) l.answers)
-                                , pre [] [ text "Guesses: " ]
-                                , div []
-                                    (List.map
-                                        (\l2 ->
-                                            div []
-                                                [ li [] [ text ("-" ++ l2.player ++ "'s guesses") ]
-                                                , div [] (List.map (\l3 -> li [] [ text ("----" ++ l3.player ++ ": " ++ l3.answer) ]) l2.answers)
-                                                ]
-                                        )
-                                        l.guesses
+                [ roundNumber model
+                , answersAndGuessForm model
+                ]
+
+        ShowResultsPhase ->
+            div []
+                [ roundNumber model
+                , resultsPage model
+                ]
+
+
+playerList : Model -> Html Msg
+playerList model =
+    div []
+        [ h3 [] [ text "Players" ]
+        , div [] (List.map (\player -> li [] [ text player ]) model.gameState.players)
+        ]
+
+
+questionAndAnswerForm : Model -> Html Msg
+questionAndAnswerForm model =
+    div []
+        [ h1 [] [ text "Question" ]
+        , text
+            (case List.reverse model.gameState.rounds of
+                [] ->
+                    "no questions"
+
+                first :: _ ->
+                    first.question
+            )
+        , h1 [] [ text "Your Answer" ]
+        , input [ type_ "text", placeholder "Answer", Html.Attributes.value model.currentAnswer, onInput UpdateCurrentAnswer ] []
+        , button [ onClick SubmitAnswer ] [ text "Submit Answer" ]
+        ]
+
+
+answersAndGuessForm : Model -> Html Msg
+answersAndGuessForm model =
+    div []
+        [ h1 [] [ text "Make Guesses" ]
+        , case List.reverse model.gameState.rounds of
+            [] ->
+                text "no questions"
+
+            round :: _ ->
+                div []
+                    ([ div []
+                        [ h3 [] [ text "Question" ]
+                        , text round.question
+                        ]
+                     , h3 [] [ text "Other Answers" ]
+                     ]
+                        ++ (if List.length round.answers == List.length model.gameState.players then
+                                List.map
+                                    (\answer ->
+                                        if answer.player == model.name then
+                                            text ""
+
+                                        else
+                                            li [] [ text answer.answer ]
                                     )
-                                , div [] [ text "--------------------------------------------" ]
-                                ]
-                        )
-                        data.rounds
+                                    round.answers
+                                    ++ [ button [ onClick SubmitGuess ] [ text "Submit Guess" ] ]
+
+                            else
+                                [ text "waiting for everyone to submit their answers" ]
+                           )
+                        ++ [ playerList model ]
                     )
-                ]
+        ]
+
+
+getNth : Int -> List a -> Maybe a
+getNth n l =
+    case l of
+        [] ->
+            Nothing
+
+        h :: t ->
+            if n == 0 then
+                Just h
+
+            else
+                getNth (n - 1) t
+
+
+resultsPage : Model -> Html Msg
+resultsPage model =
+    div []
+        [ h1 [] [ text "Results" ]
+        , if List.length model.gameState.rounds == model.currentRound then
+            text "waiting for everyone to submit their guesses"
+
+          else
+            div []
+                (case getNth 1 (List.reverse model.gameState.rounds) of
+                    Just round ->
+                        List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) round.answers
+                            ++ [ button [ onClick ContinueToNextRound ] [ text "Next Round" ] ]
+
+                    Nothing ->
+                        []
+                )
+        ]
+
+
+roundNumber : Model -> Html Msg
+roundNumber model =
+    h1 [] [ text <| "Round " ++ fromInt (List.length model.gameState.rounds) ]
 
 
 type alias Round =
@@ -167,25 +319,61 @@ type alias GameState =
     }
 
 
-createGame : Cmd Msg
-createGame =
+serverUrl =
+    "http://192.168.1.24:8172/"
+
+
+createGame : Model -> Cmd Msg
+createGame model =
     Http.request
         { method = "PUT"
         , headers = []
-        , url = "http://localhost:8172/api/v1/game/5"
-        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string "player1" ) ])
-        , expect = Http.expectJson MadeGame (succeed {})
+        , url = serverUrl ++ "api/v1/game/" ++ model.gameName
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ) ])
+        , expect = Http.expectWhatever JoinedGame
         , timeout = Nothing
         , tracker = Nothing
         }
 
 
-getGameData : Cmd Msg
-getGameData =
+joinGame : Model -> Cmd Msg
+joinGame model =
+    Http.post
+        { url = serverUrl ++ "api/v1/game/" ++ model.gameName
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ) ])
+        , expect = Http.expectWhatever JoinedGame
+        }
+
+
+getGameData : Model -> Cmd Msg
+getGameData model =
     Http.get
-        { url = "http://localhost:8172/api/v1/game/5"
+        { url = serverUrl ++ "api/v1/game/" ++ model.gameName
         , expect = Http.expectJson GotGameData decoder
         }
+
+
+submitAnswer : Model -> Cmd Msg
+submitAnswer model =
+    Http.post
+        { url = serverUrl ++ "api/v1/game/" ++ model.gameName ++ "/answer"
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answer", Json.Encode.string model.currentAnswer ) ])
+        , expect = Http.expectWhatever SubmittedAnswer
+        }
+
+
+submitGuess : Model -> Cmd Msg
+submitGuess model =
+    Http.post
+        { url = serverUrl ++ "api/v1/game/" ++ model.gameName ++ "/guess"
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answers", Json.Encode.list encodeAnswer model.currentGuess ) ])
+        , expect = Http.expectWhatever SubmittedGuess
+        }
+
+
+encodeAnswer : Answer -> Value
+encodeAnswer answer =
+    Json.Encode.object [ ( "player", Json.Encode.string answer.player ), ( "answer", Json.Encode.string answer.answer ) ]
 
 
 decoder : Decoder GameState
