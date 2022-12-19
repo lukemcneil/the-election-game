@@ -1,10 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, b, button, div, h1, h3, input, li, ol, option, pre, text, ul)
-import Html.Attributes exposing (class, placeholder, type_)
+import Html exposing (Html, b, button, div, h1, h3, h5, input, li, text, ul)
+import Html.Attributes exposing (placeholder, type_)
 import Html.Events exposing (onClick, onInput)
-import Http exposing (emptyBody)
+import Http
 import Json.Decode exposing (..)
 import Json.Encode
 import String exposing (fromInt)
@@ -273,10 +273,13 @@ answersAndGuessForm model =
                                   case guess of
                                     Just g ->
                                         div []
-                                            (div [] [ text g.answer ]
-                                                :: List.map (\player -> button [ onClick <| AddToGuess player g.answer ] [ text player ])
+                                            [ h5 [] [ text g.answer ]
+                                            , div []
+                                                (List.map
+                                                    (\player -> button [ onClick <| AddToGuess player g.answer ] [ text player ])
                                                     (List.filter (\p -> not <| p == model.name || alreadyGuessedPlayer model.currentGuess p) model.gameState.players)
-                                            )
+                                                )
+                                            ]
 
                                     Nothing ->
                                         text ""
@@ -334,9 +337,9 @@ resultsPage model =
                                 List.filter (\ans -> not <| ans.player == model.name) round.answers
                         in
                         [ h3 [] [ text "Your Answers" ]
-                        , div [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) model.currentGuess)
+                        , ul [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) model.currentGuess)
                         , h3 [] [ text "Real Answers" ]
-                        , div [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) realAnswers)
+                        , ul [] (List.map (\answer -> li [] [ b [] [ text <| answer.player ++ " - " ], text answer.answer ]) realAnswers)
                         , h3 [] [ text "Points This Round" ]
                         , ul [] <|
                             List.map
