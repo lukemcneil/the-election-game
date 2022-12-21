@@ -162,7 +162,7 @@ struct Opt {
     #[structopt(long = "host", short = "H", default_value = "0.0.0.0")]
     host: String,
     /// A port number to listen on.
-    #[structopt(long = "port", short = "P", default_value = "1234")]
+    #[structopt(long = "port", short = "P", default_value = "8172")]
     port: u16,
     /// The log level.
     #[structopt(
