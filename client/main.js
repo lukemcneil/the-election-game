@@ -6641,6 +6641,7 @@ var $author$project$Main$joinGame = function (model) {
 var $author$project$Main$SubmittedAnswer = function (a) {
 	return {$: 'SubmittedAnswer', a: a};
 };
+var $elm$core$String$toLower = _String_toLower;
 var $author$project$Main$submitAnswer = function (model) {
 	return $elm$http$Http$post(
 		{
@@ -6653,7 +6654,8 @@ var $author$project$Main$submitAnswer = function (model) {
 							$elm$json$Json$Encode$string(model.name)),
 							_Utils_Tuple2(
 							'answer',
-							$elm$json$Json$Encode$string(model.currentAnswer))
+							$elm$json$Json$Encode$string(
+								$elm$core$String$toLower(model.currentAnswer)))
 						]))),
 			expect: $elm$http$Http$expectWhatever($author$project$Main$SubmittedAnswer),
 			url: $author$project$Main$serverUrl + ('api/v1/game/' + (model.gameName + '/answer'))
@@ -6701,7 +6703,6 @@ var $author$project$Main$submitGuess = function (model) {
 			url: $author$project$Main$serverUrl + ('api/v1/game/' + (model.gameName + '/guess'))
 		});
 };
-var $elm$core$String$toLower = _String_toLower;
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6776,9 +6777,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{
-							currentAnswer: $elm$core$String$toLower(newAnswer)
-						}),
+						{currentAnswer: newAnswer}),
 					$elm$core$Platform$Cmd$none);
 			case 'SubmitAnswer':
 				return (model.currentAnswer === '') ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : _Utils_Tuple2(

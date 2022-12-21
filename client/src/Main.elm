@@ -125,7 +125,7 @@ update msg model =
             ( { model | gameName = gameName }, Cmd.none )
 
         UpdateCurrentAnswer newAnswer ->
-            ( { model | currentAnswer = String.toLower newAnswer }, Cmd.none )
+            ( { model | currentAnswer = newAnswer }, Cmd.none )
 
         SubmitAnswer ->
             if model.currentAnswer == "" then
@@ -539,7 +539,7 @@ submitAnswer : Model -> Cmd Msg
 submitAnswer model =
     Http.post
         { url = serverUrl ++ "api/v1/game/" ++ model.gameName ++ "/answer"
-        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answer", Json.Encode.string model.currentAnswer ) ])
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answer", Json.Encode.string (String.toLower model.currentAnswer) ) ])
         , expect = Http.expectWhatever SubmittedAnswer
         }
 
