@@ -147,7 +147,7 @@ ol {
 }
 :not(fieldset) > ul:not(.no-marker) li::marker {
 	color: currentColor;
-	content: '🞄 ';
+	/* content: '🞄 '; */
 }
 ul.no-marker {
 	list-style-type: none;

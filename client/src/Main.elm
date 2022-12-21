@@ -7,6 +7,8 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (..)
 import Json.Encode
+import List.Extra exposing (getAt, removeAt)
+import Random exposing (Seed, int, step)
 import String exposing (fromInt)
 import Time
 
@@ -244,7 +246,11 @@ answersAndGuessForm model =
                     ([ text round.question
                      , h3 [] [ text "Other Answers" ]
                      ]
-                        ++ (if List.length round.answers == List.length model.gameState.players then
+                        ++ (let
+                                sortedAnswers =
+                                    shuffleList (Random.initialSeed 0) round.answers
+                            in
+                            (if List.length sortedAnswers == List.length model.gameState.players then
                                 [ ul []
                                     (List.map
                                         (\answer ->
@@ -254,12 +260,12 @@ answersAndGuessForm model =
                                             else
                                                 li [] [ text answer.answer ]
                                         )
-                                        round.answers
+                                        sortedAnswers
                                     )
                                 , h3 [] [ text "Who gave this answer?" ]
                                 , let
                                     guess =
-                                        getNth (List.length model.currentGuess) (List.filter (\ans -> not <| ans.player == model.name) round.answers)
+                                        getNth (List.length model.currentGuess) (List.filter (\ans -> not <| ans.player == model.name) sortedAnswers)
                                   in
                                   case guess of
                                     Just g ->
@@ -268,7 +274,9 @@ answersAndGuessForm model =
                                             , div []
                                                 (List.map
                                                     (\player -> button [ onClick <| AddToGuess player g.answer ] [ text player ])
-                                                    (List.filter (\p -> not <| p == model.name || alreadyGuessedPlayer model.currentGuess p) model.gameState.players)
+                                                    (List.filter (\p -> not <| p == model.name || alreadyGuessedPlayer model.currentGuess p)
+                                                        (shuffleList (Random.initialSeed 0) model.gameState.players)
+                                                    )
                                                 )
                                             ]
 
@@ -276,14 +284,15 @@ answersAndGuessForm model =
                                         text ""
                                 ]
 
-                            else
+                             else
                                 [ text "waiting for"
                                 , ul [] <|
                                     List.map (\p -> li [] [ text p ])
                                         (List.filter (\x -> not <| List.any (\ans -> ans.player == x) round.answers) model.gameState.players)
                                 ]
+                            )
+                                ++ [ playerList model ]
                            )
-                        ++ [ playerList model ]
                     )
         ]
 
@@ -580,3 +589,35 @@ guessDecoder =
         Guess
         (field "player" string)
         (field "answers" (list answerDecoder))
+
+
+shuffleList : Seed -> List a -> List a
+shuffleList seed list =
+    shuffleListHelper seed list []
+
+
+shuffleListHelper : Seed -> List a -> List a -> List a
+shuffleListHelper seed source result =
+    if List.isEmpty source then
+        result
+
+    else
+        let
+            indexGenerator =
+                Random.int 0 (List.length source - 1)
+
+            ( index, nextSeed ) =
+                step indexGenerator seed
+
+            valAtIndex =
+                getAt index source
+
+            sourceWithoutIndex =
+                removeAt index source
+        in
+        case valAtIndex of
+            Just val ->
+                shuffleListHelper nextSeed sourceWithoutIndex (val :: result)
+
+            Nothing ->
+                source
