@@ -6,7 +6,7 @@ A game of asking questions and guessing answers.
 
 1. If necessary, update constant `serverUrl` in `Main.elm`
 2. Run `yarn build` in the `client` directory to update the `index.html` served by the server
-3. Run the server with `cargo run -- --questions-file "questions.txt"`
+3. Run the server with `cargo run -- --questions-file "questions.txt"` from the `server-rust` directory
 
 ## Design
 
