@@ -6509,7 +6509,7 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $author$project$Main$serverUrl = 'http://192.168.1.26:8172/';
+var $author$project$Main$serverUrl = '';
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Main$createGame = function (model) {
 	return $elm$http$Http$request(

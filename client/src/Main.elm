@@ -500,9 +500,15 @@ type alias GameState =
     }
 
 
+
+-- serverUrl : String
+-- serverUrl =
+--     "http://192.168.1.26:8172/"
+
+
 serverUrl : String
 serverUrl =
-    "http://192.168.1.26:8172/"
+    ""
 
 
 createGame : Model -> Cmd Msg
