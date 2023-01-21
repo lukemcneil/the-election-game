@@ -502,7 +502,7 @@ type alias GameState =
 
 serverUrl : String
 serverUrl =
-    "http://192.168.1.24:8172/"
+    "http://192.168.1.26:8172/"
 
 
 createGame : Model -> Cmd Msg
@@ -539,7 +539,7 @@ submitAnswer : Model -> Cmd Msg
 submitAnswer model =
     Http.post
         { url = serverUrl ++ "api/v1/game/" ++ model.gameName ++ "/answer"
-        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answer", Json.Encode.string (String.toLower model.currentAnswer) ) ])
+        , body = Http.jsonBody (Json.Encode.object [ ( "player", Json.Encode.string model.name ), ( "answer", Json.Encode.string (String.trim (String.toLower model.currentAnswer)) ) ])
         , expect = Http.expectWhatever SubmittedAnswer
         }
 
