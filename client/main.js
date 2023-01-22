@@ -7823,105 +7823,117 @@ var $author$project$Main$roundNumber = function (model) {
 			]));
 };
 var $author$project$Main$view = function (model) {
-	var _v0 = model.phase;
-	switch (_v0.$) {
-		case 'JoinPhase':
-			var joinMessage = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Weighty Inquiry')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(joinMessage)
-							])),
-						A2(
-						$elm$html$Html$input,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$placeholder('Player Name'),
-								$elm$html$Html$Attributes$value(model.name),
-								$elm$html$Html$Events$onInput($author$project$Main$UpdateName)
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$input,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$placeholder('Game Room Name'),
-								$elm$html$Html$Attributes$value(model.gameName),
-								$elm$html$Html$Events$onInput($author$project$Main$UpdateGameName)
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$MakeGame)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Create Game')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$JoinGame)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Join Game')
-									]))
-							]))
-					]));
-		case 'AnswerPhase':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$roundNumber(model),
-						$author$project$Main$questionAndAnswerForm(model),
-						$author$project$Main$playerList(model)
-					]));
-		case 'GuessPhase':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$roundNumber(model),
-						$author$project$Main$answersAndGuessForm(model)
-					]));
-		default:
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$roundNumber(model),
-						$author$project$Main$resultsPage(model)
-					]));
-	}
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'padding-left', '25'),
+				A2($elm$html$Html$Attributes$style, 'padding-right', '25')
+			]),
+		_List_fromArray(
+			[
+				function () {
+				var _v0 = model.phase;
+				switch (_v0.$) {
+					case 'JoinPhase':
+						var joinMessage = _v0.a;
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$h1,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Weighty Inquiry')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text(joinMessage)
+										])),
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$type_('text'),
+											$elm$html$Html$Attributes$placeholder('Player Name'),
+											$elm$html$Html$Attributes$value(model.name),
+											$elm$html$Html$Events$onInput($author$project$Main$UpdateName)
+										]),
+									_List_Nil),
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$type_('text'),
+											$elm$html$Html$Attributes$placeholder('Game Room Name'),
+											$elm$html$Html$Attributes$value(model.gameName),
+											$elm$html$Html$Events$onInput($author$project$Main$UpdateGameName)
+										]),
+									_List_Nil),
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onClick($author$project$Main$MakeGame)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Create Game')
+												])),
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onClick($author$project$Main$JoinGame)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Join Game')
+												]))
+										]))
+								]));
+					case 'AnswerPhase':
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$author$project$Main$roundNumber(model),
+									$author$project$Main$questionAndAnswerForm(model),
+									$author$project$Main$playerList(model)
+								]));
+					case 'GuessPhase':
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$author$project$Main$roundNumber(model),
+									$author$project$Main$answersAndGuessForm(model)
+								]));
+					default:
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$author$project$Main$roundNumber(model),
+									$author$project$Main$resultsPage(model)
+								]));
+				}
+			}()
+			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});

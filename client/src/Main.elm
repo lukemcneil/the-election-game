@@ -170,37 +170,39 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case model.phase of
-        JoinPhase joinMessage ->
-            div []
-                [ h1 [] [ text "Weighty Inquiry" ]
-                , div [] [ text joinMessage ]
-                , input [ type_ "text", placeholder "Player Name", Html.Attributes.value model.name, onInput UpdateName ] []
-                , input [ type_ "text", placeholder "Game Room Name", Html.Attributes.value model.gameName, onInput UpdateGameName ] []
-                , div []
-                    [ button [ onClick MakeGame ] [ text "Create Game" ]
-                    , button [ onClick JoinGame ] [ text "Join Game" ]
+    div [ style "padding-left" "25", style "padding-right" "25" ]
+        [ case model.phase of
+            JoinPhase joinMessage ->
+                div []
+                    [ h1 [] [ text "Weighty Inquiry" ]
+                    , div [] [ text joinMessage ]
+                    , input [ type_ "text", placeholder "Player Name", Html.Attributes.value model.name, onInput UpdateName ] []
+                    , input [ type_ "text", placeholder "Game Room Name", Html.Attributes.value model.gameName, onInput UpdateGameName ] []
+                    , div []
+                        [ button [ onClick MakeGame ] [ text "Create Game" ]
+                        , button [ onClick JoinGame ] [ text "Join Game" ]
+                        ]
                     ]
-                ]
 
-        AnswerPhase ->
-            div []
-                [ roundNumber model
-                , questionAndAnswerForm model
-                , playerList model
-                ]
+            AnswerPhase ->
+                div []
+                    [ roundNumber model
+                    , questionAndAnswerForm model
+                    , playerList model
+                    ]
 
-        GuessPhase ->
-            div []
-                [ roundNumber model
-                , answersAndGuessForm model
-                ]
+            GuessPhase ->
+                div []
+                    [ roundNumber model
+                    , answersAndGuessForm model
+                    ]
 
-        ShowResultsPhase ->
-            div []
-                [ roundNumber model
-                , resultsPage model
-                ]
+            ShowResultsPhase ->
+                div []
+                    [ roundNumber model
+                    , resultsPage model
+                    ]
+        ]
 
 
 playerList : Model -> Html Msg
