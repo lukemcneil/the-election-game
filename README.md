@@ -2,6 +2,10 @@
 
 A game of asking questions and guessing answers.
 
+## To Run
+1. `cd server-rust`
+2. `cargo run -- --questions-file new_questions.txt`
+
 ## Design
 
 ### User Interactions
