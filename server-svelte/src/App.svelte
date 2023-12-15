@@ -1,15 +1,44 @@
-<script>
+<script lang="ts">
   import InputField from './lib/InputField.svelte';
   import Button from './lib/Button.svelte'
-  let joinGameText = "Join Game"
-  let name = "";
-  let room_name = "";
-  function onClick() {
+  let base_url: string = "http://0.0.0.0:8172/api/v1/game/" 
+  let name: string = "";
+  let game_name: string = "";
+
+  async function onClickCreateGame() {
     console.log(name);
+    const response: Promise<Response> = createGameRequest();
+    console.log("here");
+    response.then((response) => {
+      if (response.ok) {
+        console.log("game created " + game_name);
+      }
+      else {
+        console.log("room is already created");
+      }
+    })
   }
 
-  function onClickJoinRoom() {
-    console.log(room_name);
+  async function createGameRequest() {
+    const request: Promise<Response> = await fetch(base_url + game_name, {
+      method: "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        player: name
+      })
+    })
+    return request;
+  }
+
+  async function onClickJoinGame() {
+    console.log(game_name);
+    const request = await fetch(base_url + game_name, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        player: name
+      })
+    })
   }
 </script>
 
@@ -21,15 +50,15 @@
   </div>
 
   <div class="card">
-    <InputField bind:value="{room_name}" text="enter the game room"/>
+    <InputField bind:value="{game_name}" text="enter the game room"/>
   </div>
   
   <div class="card">
-    <Button text="Join Game" onClick={onClick} />
+    <Button text="Join Game" onClick={onClickJoinGame} />
   </div>
 
   <div class="card">
-    <Button text="Create Game" onClick={onClickJoinRoom}/>
+    <Button text="Create Game" onClick={onClickCreateGame}/>
   </div>
 
 </main>
