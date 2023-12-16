@@ -135,7 +135,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     rocket::ignite().attach(cors.to_cors().unwrap());
     rocket
         .attach(cors.to_cors().unwrap())
-        .mount("/", StaticFiles::from("../client/"))
+        .mount("/", StaticFiles::from("../client-elm/"))
         .mount(
             "/api/v1",
             routes![
