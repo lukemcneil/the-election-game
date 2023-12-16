@@ -4,7 +4,7 @@
     let game_name: string = "";
     let get_game_request: string = "api/v1/game/";
 
-    import { onMount } from svelte;
+    // import { onMount } from svelte;
 
     function onMount() {
         
