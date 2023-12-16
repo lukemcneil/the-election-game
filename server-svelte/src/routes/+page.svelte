@@ -33,6 +33,18 @@
 
   async function onClickJoinGame() {
     console.log(game_name);
+    const response: Promise<Response> = joinGameRequest();
+    response.then((response) => {
+      if (response.ok){
+        console.log("successfully joined game " + game_name)
+      }
+      else {
+        console.log("failed to join game " + game_name);
+      }
+    })
+  }
+
+  async function joinGameRequest() {
     const request = await fetch(base_url + game_name, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
