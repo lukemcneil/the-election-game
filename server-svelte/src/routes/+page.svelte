@@ -1,6 +1,6 @@
 <script lang="ts">
-  import InputField from './lib/InputField.svelte';
-  import Button from './lib/Button.svelte'
+  import InputField from '../lib/InputField.svelte';
+  import Button from '../lib/Button.svelte'
   let base_url: string = "http://0.0.0.0:8172/api/v1/game/" 
   let name: string = "";
   let game_name: string = "";
@@ -12,6 +12,7 @@
     response.then((response) => {
       if (response.ok) {
         console.log("game created " + game_name);
+        window.location.href = "/game/"
       }
       else {
         console.log("room is already created");
@@ -43,6 +44,13 @@
 </script>
 
 <main>
+
+  <nav>
+    <a href="/">home</a>
+    <a href="/game/">game</a>
+    
+  </nav>
+
   <h1>Weight Inquiries</h1>
 
   <div class="card">
