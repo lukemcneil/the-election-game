@@ -4,6 +4,10 @@ on:
   push:
     branches: 'master'
 
+defaults:
+  run:
+    working-directory: client-svelte
+
 jobs:
   build_site:
     runs-on: ubuntu-latest
@@ -13,7 +17,7 @@ jobs:
 
       - name: Install Node.js
         env:
-          BASE_PATH: '/client-svelte/'
+          BASE_PATH: '/client-svelte/<'
         uses: actions/setup-node@v3
         with:
           node-version: 18
