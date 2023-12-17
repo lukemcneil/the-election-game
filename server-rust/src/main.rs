@@ -135,7 +135,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     rocket::ignite().attach(cors.to_cors().unwrap());
     rocket
         .attach(cors.to_cors().unwrap())
-        .mount("/", StaticFiles::from("../client-svelte/build/"))
+        .mount("/", StaticFiles::from("../client-svelte/build/index.html"))
         .mount(
             "/api/v1",
             routes![
