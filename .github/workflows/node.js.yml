@@ -12,6 +12,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Node.js
+        env:
+          BASE_PATH: '/client-svelte/'
         uses: actions/setup-node@v3
         with:
           node-version: 18
