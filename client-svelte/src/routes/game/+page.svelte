@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { svelte } from "@sveltejs/vite-plugin-svelte";
+	import Button from "$lib/Button.svelte";
 
-    let game_name: string = "";
-    let get_game_request: string = "api/v1/game/";
-
-    // import { onMount } from svelte;
-
-    function onMount() {
-        
+    let name: any;
+    let game_name: any;
+    if (typeof localStorage !== "undefined") {
+        name = localStorage.getItem("name");
+        game_name = localStorage.getItem("game_name");
     }
+
+    let get_game_request: string = "api/v1/game/";
 
     async function getGameState() {
         const request: Promise<Request> = await fetch(get_game_request + game_name, {
@@ -17,8 +17,20 @@
         })
         return request;
     }
+
+    function print() {
+        console.log(name);
+        console.log(game_name);
+    }
 </script>
 
 <main>
+    <Button text="test" onClick={print} />
+    <div>
+        {name}
+    </div>
+    <div>
+        {game_name}
+    </div>
     this is the game page
 </main>

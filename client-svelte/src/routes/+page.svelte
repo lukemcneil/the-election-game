@@ -1,46 +1,74 @@
 <script lang="ts">
   import InputField from '../lib/InputField.svelte';
   import Button from '../lib/Button.svelte'
+  
   let production_url = "https://weight-inquiries.onrender.com/api/v1/game/"
-  let test_url: string = "http://0.0.0.0:8172/api/v1/game/" 
+  let test_url: string = "http://0.0.0.0:8172/api/v1/game/"
+  let base_url = test_url;
+  
   let name: string = "";
   let game_name: string = "";
 
-  let pages_base_path: string = "/weighty-inquiry/"
+  let error_message = "";
+  let no_name_error_message = "no name";
+  let no_game_room_error_message = "no game room name";
+  let game_already_exists_error_message = "this game already exists";
+
+  function updateGlobal() {
+    localStorage.setItem("name", name);
+    localStorage.setItem("game_name", game_name);
+  }
 
   async function onClickCreateGame() {
-    console.log(name);
+    if (name == "") {
+      error_message = no_name_error_message;
+      return;
+    }
+    if (game_name == "") {
+      error_message = no_game_room_error_message;
+      return;
+    }
     const response: Promise<Response> = createGameRequest();
-    console.log("here");
     response.then((response) => {
       if (response.ok) {
-        console.log("game created " + game_name);
-        window.location.href = pages_base_path + "game"
+        updateGlobal();
+        window.location.href = window.location.href + "game/"
       }
       else {
-        console.log("room is already created");
+        console.log(response.status);
+        if (response.status == 409) {
+          error_message = game_already_exists_error_message;
+        }
+        error_message = "some other error when making a game";
       }
     })
   }
 
   async function createGameRequest() {
-    const request: Promise<Response> = await fetch(production_url + game_name, {
+    const response: Promise<Response> = await fetch(base_url + game_name, {
       method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         player: name
       })
     })
-    return request;
+    return response;
   }
 
   async function onClickJoinGame() {
-    console.log(game_name);
+    if (name == "") {
+      error_message = no_name_error_message;
+      return;
+    }
+    if (game_name == "") {
+      error_message = no_game_room_error_message;
+      return;
+    }
     const response: Promise<Response> = joinGameRequest();
     response.then((response) => {
       if (response.ok){
-        console.log("successfully joined game " + game_name)
-        window.location.href = pages_base_path + "game"
+        updateGlobal();
+        window.location.href = window.location.href + "game"
       }
       else {
         console.log("failed to join game " + game_name);
@@ -49,13 +77,19 @@
   }
 
   async function joinGameRequest() {
-    const request = await fetch(production_url + game_name, {
+    const request = await fetch(base_url + game_name, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         player: name
       })
     })
+    return request;
+  }
+
+  function print() {
+    console.log(name);
+    console.log(game_name);
   }
 </script>
 
@@ -70,6 +104,9 @@
   <h1>Weight Inquiries</h1>
 
   <div class="card">
+    <Button text="test" onClick={print} />
+  </div>
+  <div class="card">
     <InputField bind:value="{name}" text="enter your name" />
   </div>
 
@@ -83,6 +120,10 @@
 
   <div class="card">
     <Button text="Create Game" onClick={onClickCreateGame}/>
+  </div>
+
+  <div class="card">
+    {error_message}
   </div>
 
 </main>
