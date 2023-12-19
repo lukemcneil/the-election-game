@@ -1,7 +1,8 @@
 <script lang="ts">
   import InputField from '../lib/InputField.svelte';
   import Button from '../lib/Button.svelte'
-  let base_url: string = "http://0.0.0.0:8172/api/v1/game/" 
+  let production_url = "https://weight-inquiries.onrender.com/api/v1/game/"
+  let test_url: string = "http://0.0.0.0:8172/api/v1/game/" 
   let name: string = "";
   let game_name: string = "";
 
@@ -21,7 +22,7 @@
   }
 
   async function createGameRequest() {
-    const request: Promise<Response> = await fetch(base_url + game_name, {
+    const request: Promise<Response> = await fetch(production_url + game_name, {
       method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
@@ -45,7 +46,7 @@
   }
 
   async function joinGameRequest() {
-    const request = await fetch(base_url + game_name, {
+    const request = await fetch(production_url + game_name, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
