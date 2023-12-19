@@ -20,5 +20,5 @@
 </script>
 
 <main>
-
+    this is the game page
 </main>

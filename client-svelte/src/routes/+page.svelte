@@ -15,7 +15,7 @@
     response.then((response) => {
       if (response.ok) {
         console.log("game created " + game_name);
-        window.location.href = pages_base_path + "game/"
+        window.location.href = pages_base_path + "game"
       }
       else {
         console.log("room is already created");
