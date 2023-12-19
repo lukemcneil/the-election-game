@@ -6,6 +6,8 @@
   let name: string = "";
   let game_name: string = "";
 
+  let pages_base_path: string = "/weighty-inquiry/"
+
   async function onClickCreateGame() {
     console.log(name);
     const response: Promise<Response> = createGameRequest();
@@ -13,7 +15,7 @@
     response.then((response) => {
       if (response.ok) {
         console.log("game created " + game_name);
-        window.location.href = "/game/"
+        window.location.href = pages_base_path + "game/"
       }
       else {
         console.log("room is already created");
@@ -38,6 +40,7 @@
     response.then((response) => {
       if (response.ok){
         console.log("successfully joined game " + game_name)
+        window.location.href = pages_base_path + "game/"
       }
       else {
         console.log("failed to join game " + game_name);
