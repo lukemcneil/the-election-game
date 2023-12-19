@@ -4,14 +4,17 @@ on:
   push:
     branches: 'master'
 
-defaults:
-  run:
-    working-directory: client-svelte
+# defaults:
+#   run:
+#     working-directory: client-svelte
 
 jobs:
   build_site:
     runs-on: ubuntu-latest
     steps:
+      - name: change
+        run: cd client-svelte
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -22,11 +25,9 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        working-directory: client-svelte
         run: npm install
 
       - name: build
-        working-directory: client-svelte
         run: |
           npm run build
           touch build/.nojekyll
