@@ -4,9 +4,9 @@ on:
   push:
     branches: 'master'
 
-# defaults:
-#   run:
-#     working-directory: client-svelte
+defaults:
+  run:
+    working-directory: client-svelte
 
 jobs:
   build_site:
