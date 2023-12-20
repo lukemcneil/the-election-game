@@ -3,7 +3,11 @@ import { Answer } from "./answer"
 import { Guess } from "./guess"
 
 export class Round {
-    player: Player | undefined;
+    question: string | undefined;
     answers: Array<Answer> = [];
     guesses: Array<Guess> = [];
+
+    constructor(question: string) {
+        this.question = question;
+    }
 }

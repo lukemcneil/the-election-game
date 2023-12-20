@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
+	import InputField from "$lib/InputField.svelte";
     import { Game } from "$lib/datatypes/game";
 	import { Player } from "$lib/datatypes/player";
+    import { Round } from "$lib/datatypes/round";
 	import { onMount } from "svelte";
-	import { slide } from "svelte/transition";
 
     let name: string | null;
     let game_name: string | null;
@@ -18,10 +19,12 @@
 
     let game: Game;
     let players: Array<Player> = [];
-
+    let rounds: Array<Round> = [];
+    
+    let current_question: string | undefined = "";
+    let answer: string = "";
 
     async function getGameState() {
-        console.log(base_url + game_name);
         const response: Response = await fetch(base_url + game_name, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
@@ -29,12 +32,38 @@
         return response;
     }
 
+    function onSubmitClick() {
+        if (answer == "" ) {
+            console.log("you need a non-empty answer");
+            return;
+        }
+        const response: Promise<Response> = postAnswer(); 
+        response.then((response) => {
+            if (response.ok) {
+                window.location.href = window.location.href + "wait"
+            }
+        })
+    }
+
+    async function postAnswer() {
+        const response: Response = await fetch(base_url + game_name + "/answer", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                player: name,
+                answer: answer,
+            })
+        })
+        return response;
+    }
+
     async function getGame() {
         getGameState().then((response) => response.json()).then((data) => {
-            game = new Game(data.players);
+            game = data as Game;
             players = game.players;
-            // console.log(data.players);
-            // console.log(game.players);
+            rounds = game.rounds;
+            current_question = game.rounds[rounds.length - 1].question;
+            console.log(rounds);
         })
     }
     
@@ -46,7 +75,7 @@
     async function getGameLoop() {
         getGame();
         await sleep(get_game_interval_ms);
-        getGameLoop();
+        // getGameLoop();
     }
 
     onMount(() => {
@@ -65,11 +94,23 @@
         Game Room Name: {game_name}
     </div>
     <div>
+        {current_question}
+    </div>
+    <div>
+        <InputField bind:value="{answer}" text="enter your answer" />
+    </div>
+    <div>
+        <Button text="Submit" onClick={onSubmitClick} />
+    </div>
+    <!-- <div>
+        {rounds[rounds.length - 1].question}
+    </div> -->
+    <div>
         Players:
     </div>
     {#each players as player}
         <div>
-            {player.name}
+            {player}
         </div>
     {/each}
 
