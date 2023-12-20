@@ -4,6 +4,6 @@ import { Guess } from "./guess"
 
 export class Round {
     player: Player | undefined;
-    answers: Array<Answer> | undefined;
-    guesses: Array<Guess> | undefined;
+    answers: Array<Answer> = [];
+    guesses: Array<Guess> = [];
 }
