@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from "$app/paths";
 	import Button from "$lib/Button.svelte";
 	import InputField from "$lib/InputField.svelte";
     import { Game } from "$lib/datatypes/game";
@@ -6,16 +7,14 @@
     import { Round } from "$lib/datatypes/round";
 	import { onMount } from "svelte";
 
-    let name: string | null;
-    let game_name: string | null;
+    let name: string;
+    let game_name: string;
+    let base_server_path: string;
     if (typeof localStorage !== "undefined") {
-        name = localStorage.getItem("name");
-        game_name = localStorage.getItem("game_name");
+        name = JSON.parse(localStorage.getItem("name")!);
+        game_name = JSON.parse(localStorage.getItem("game_name")!);
+        base_server_path = JSON.parse(localStorage.getItem("base_server_path")!);
     }
-
-    let production_url: string = "https://weight-inquiries.onrender.com/api/v1/game/"
-    let test_url: string = "http://0.0.0.0:8172/api/v1/game/"
-    let base_url: string = test_url;
 
     let game: Game;
     let players: Array<Player> = [];
@@ -23,9 +22,10 @@
     
     let current_question: string | undefined = "";
     let answer: string = "";
+    let has_answered: boolean = false;
 
     async function getGameState() {
-        const response: Response = await fetch(base_url + game_name, {
+        const response: Response = await fetch(base_server_path + game_name, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
         })
@@ -40,13 +40,14 @@
         const response: Promise<Response> = postAnswer(); 
         response.then((response) => {
             if (response.ok) {
-                window.location.href = window.location.href + "wait"
+                // window.location.href = localStorage.getItem("base_client_path") + "wait"
+                has_answered = true;
             }
         })
     }
 
     async function postAnswer() {
-        const response: Response = await fetch(base_url + game_name + "/answer", {
+        const response: Response = await fetch(base_server_path + game_name + "/answer", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -96,15 +97,14 @@
     <div>
         {current_question}
     </div>
-    <div>
-        <InputField bind:value="{answer}" text="enter your answer" />
-    </div>
-    <div>
-        <Button text="Submit" onClick={onSubmitClick} />
-    </div>
-    <!-- <div>
-        {rounds[rounds.length - 1].question}
-    </div> -->
+    {#if !has_answered}
+        <div>
+            <InputField bind:value="{answer}" text="enter your answer" />
+        </div>
+        <div>
+            <Button text="Submit" onClick={onSubmitClick} />
+        </div>
+    {/if}
     <div>
         Players:
     </div>
@@ -113,5 +113,11 @@
             {player}
         </div>
     {/each}
+
+    {#if has_answered}
+    <div>
+        you have answered the question
+    </div>
+    {/if}
 
 </main>

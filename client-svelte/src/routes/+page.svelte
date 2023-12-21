@@ -1,10 +1,10 @@
 <script lang="ts">
   import InputField from '../lib/InputField.svelte';
   import Button from '../lib/Button.svelte'
+	import { onMount } from 'svelte';
   
   let production_url = "https://weight-inquiries.onrender.com/api/v1/game/"
   let test_url: string = "http://0.0.0.0:8172/api/v1/game/"
-  let base_url = test_url;
   
   let name: string = "";
   let game_name: string = "";
@@ -45,7 +45,7 @@
   }
 
   async function createGameRequest() {
-    const response: Promise<Response> = await fetch(base_url + game_name, {
+    const response: Response = await fetch(localStorage.getItem("base_server_path") + game_name, {
       method: "PUT",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
@@ -77,7 +77,7 @@
   }
 
   async function joinGameRequest() {
-    const request = await fetch(base_url + game_name, {
+    const request = await fetch(localStorage.getItem("base_server_path") + game_name, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
@@ -86,6 +86,16 @@
     })
     return request;
   }
+
+  onMount(() => {
+    localStorage.setItem("base_client_path", window.location.href);
+    if (window.location.href == "") {
+      localStorage.setItem("base_server_path", production_url);
+    }
+    else {
+      localStorage.setItem("base_server_path", test_url);
+    }
+  })
 
   function print() {
     console.log(name);
