@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { base } from "$app/paths";
 	import Button from "$lib/Button.svelte";
 	import InputField from "$lib/InputField.svelte";
     import { Game } from "$lib/datatypes/game";
@@ -40,6 +39,7 @@
     let current_question: string | undefined = "";
     let answer: string = "";
     let has_answered: boolean = false;
+    let has_everybody_answered: boolean = false;
 
     async function getGameState() {
         console.log(base_server_path);
@@ -81,8 +81,11 @@
             game = data as Game;
             players = game.players;
             rounds = game.rounds;
+            has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
+            if (has_everybody_answered) {
+                window.location.href = localStorage.getItem("base_client_path") + "guess";
+            }
             current_question = game.rounds[rounds.length - 1].question;
-            console.log(rounds);
         })
     }
     
