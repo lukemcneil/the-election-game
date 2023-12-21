@@ -89,11 +89,12 @@
 
   onMount(() => {
     localStorage.setItem("base_client_path", window.location.href);
-    if (window.location.href == "https://adammcneil.github.io/weighty-inquiry/") {
-      localStorage.setItem("base_server_path", production_url);
+    console.log(window.location.href);
+    if (window.location.href == "http://localhost:5173/") {
+      localStorage.setItem("base_server_path", test_url);
     }
     else {
-      localStorage.setItem("base_server_path", test_url);
+      localStorage.setItem("base_server_path", production_url);
     }
   })
 
