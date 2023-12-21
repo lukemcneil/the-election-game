@@ -32,7 +32,7 @@
     response.then((response) => {
       if (response.ok) {
         updateGlobal();
-        window.location.href = window.location.href + "game/"
+        window.location.href = window.location.href + "game"
       }
       else {
         console.log(response.status);
