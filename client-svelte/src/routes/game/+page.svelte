@@ -42,7 +42,6 @@
     let has_everybody_answered: boolean = false;
 
     async function getGameState() {
-        console.log(base_server_path);
         const response: Response = await fetch(base_server_path + game_name, {
             method: "GET",
             headers: {"Content-Type": "application/json"},

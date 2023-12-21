@@ -1,6 +1,11 @@
 import { Player } from "./player";
 
 export class Answer {
-    player: Player = new Player("");
+    player: string = "";
     answer: string = "";
+
+    constructor(name: string, answer: string) {
+        this.player = name;
+        this.answer = answer;
+    }
 }
