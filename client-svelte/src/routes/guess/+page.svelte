@@ -66,17 +66,24 @@
     
     let game: Game;
     let players: Array<string> = [];
+    let other_players: Array<string> = [];
     let answers: Array<Answer> = [];
     let rounds: Array<Round> = [];
     let guess_player_list: Array<string> = [];
     let guess: Guess = new Guess(name, []);
     let has_submitted: boolean = false;
     let has_everybody_guessed: boolean = false;
+
     async function getGame() {
         getGameState().then((response) => response.json()).then((data) => {
             game = data as Game;
             console.log(game);
             players = data.players;
+            players.forEach((player: string) => {
+                if (player != name){
+                    other_players.push(player);
+                }
+            });
             if (answers.length == 0) {
                 answers = data.rounds[data.rounds.length - 1].answers;
             }
@@ -86,16 +93,11 @@
                 window.location.href = localStorage.getItem("base_client_path") + "results";
             }
             rounds = game.rounds;
-            // has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
-            // if (has_everybody_answered) {
-            //     window.location.href = localStorage.getItem("base_client_path") + "guess";
-            // }
-            // current_question = game.rounds[rounds.length - 1].question;
         })
     }
 
     async function postGuess() {
-        // console.log(JSON.stringify(guess));
+        console.log(guess);
         const response: Response = await fetch(base_server_path + game_name + "/guess", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -107,9 +109,10 @@
     function onSubmit() {
         console.log(guess_player_list);
         answers.forEach((answer, i) => {
-            guess.answers.push(new Answer(guess_player_list[i], answer.answer));    
+            if (answer.player != name) {
+                guess.answers.push(new Answer(guess_player_list[i], answer.answer));    
+            }
         });
-        // console.log(guess);
         const response: Promise<Response> = postGuess();
         response.then((response) => {
             if (response.ok) {
@@ -135,10 +138,12 @@
     {#if !has_submitted}
         <div>
             {#each answers as answer, i}
-                <div>
-                    {answer.answer}
-                    <Dropdown bind:selected={guess_player_list[i]} options={players} />
-                </div>
+                {#if answer.player != name}
+                    <div>
+                        {answer.answer}
+                        <Dropdown bind:selected={guess_player_list[i]} options={other_players} />
+                    </div>
+                {/if}
             {/each}
         </div>
         <div>

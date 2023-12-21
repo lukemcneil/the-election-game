@@ -99,26 +99,11 @@
       localStorage.setItem("base_server_path", production_url);
     }
   })
-
-  function print() {
-    console.log(name);
-    console.log(game_name);
-  }
 </script>
 
 <main>
-
-  <nav>
-    <a href="/">home</a>
-    <a href="/game/">game</a>
-    
-  </nav>
-
   <h1>Weight Inquiries</h1>
 
-  <div class="card">
-    <Button text="test" onClick={print} />
-  </div>
   <div class="card">
     <InputField bind:value="{name}" text="enter your name" />
   </div>

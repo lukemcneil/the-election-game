@@ -1,5 +1,10 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
+	import PlayerList from "$lib/PlayerList.svelte";
+	import type { Answer } from "$lib/datatypes/answer";
+	import type { Game } from "$lib/datatypes/game";
+	import type { Guess } from "$lib/datatypes/guess";
+	import { onMount } from "svelte";
 
     let name: any;
     let game_name: any;
@@ -40,10 +45,63 @@
         localStorage.setItem("round_count", round_count + 1 as string);
         window.location.href = localStorage.getItem("base_client_path") + "game";
     }
+
+    async function getGameState() {
+        const response: Response = await fetch(base_server_path + game_name, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"},
+        })
+        return response;
+    }
+
+    let answers: Array<Answer> = [];
+    let correct_answer_map: Map<string, string> = new Map();
+    let my_guess: Array<Answer> = [];
+    let my_guess_map: Map<string, string> = new Map();
+    async function getGame() {
+        getGameState().then((response) => response.json()).then((data) => {
+            console.log(data);
+
+            answers = data.rounds[round_count].answers;
+            answers.forEach((answer: Answer) => {
+                correct_answer_map.set(answer.player, answer.answer);
+            });
+
+            data.rounds[round_count].guesses.forEach((guess: Guess) => {
+                if (guess.player == name) {
+                    my_guess = guess.answers;
+                }
+            });
+            my_guess.forEach((answer: Answer) => {
+                my_guess_map.set(answer.player, answer.answer);
+            })
+
+            console.log(answers);
+            console.log(my_guess);
+        })
+    }
+
+    onMount(() => {
+        getGame();
+    })
 </script>
 
 <main>
     This is where we will see the results.
+    <div>
+        {#each answers as answer}
+            {#if answer.player != name}
+                <div>
+                    {answer.player}: {my_guess_map.get(answer.player)}
+                    {#if answer.answer == my_guess_map.get(answer.player)}
+                        ✅
+                    {:else}
+                        ❌ actually said: {answer.answer}
+                    {/if}
+                </div>
+            {/if}
+        {/each}
+    </div>
     <div>
         <Button text="Next Round" onClick={onNextRoundClick} />
     </div>

@@ -110,15 +110,9 @@
     onMount(() => {
         getGameLoop();
     })
-
-    function print() {
-        console.log(game.players);
-    }
 </script>
 
 <main>
-    <Button text="getGame" onClick={getGame} />
-    <Button text="print" onClick={print}/>
     <div>
         Game Room Name: {game_name}
     </div>
