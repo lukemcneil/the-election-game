@@ -66,6 +66,8 @@
     let rounds: Array<Round> = [];
     let guess_player_list: Array<string> = [];
     let guess: Guess = new Guess(name, []);
+    let has_submitted: boolean = false;
+    let has_everybody_guessed: boolean = false;
     async function getGame() {
         getGameState().then((response) => response.json()).then((data) => {
             game = data as Game;
@@ -73,6 +75,10 @@
             players = data.players;
             if (answers.length == 0) {
                 answers = data.rounds[data.rounds.length - 1].answers;
+            }
+            has_everybody_guessed = data.rounds[data.rounds.length - 1].guesses.length == players.length;
+            if (has_everybody_guessed) {
+                window.location.href = localStorage.getItem("base_client_path") + "results";
             }
             rounds = game.rounds;
             // has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
@@ -103,6 +109,7 @@
         response.then((response) => {
             if (response.ok) {
                 console.log("ok");
+                has_submitted = true;
             }
             else {
                 console.log("not ok");
@@ -120,20 +127,20 @@
     <div>
         This is the page for guessing who said what
     </div>
-
-    <div>
-        {#each answers as answer, i}
-            <div>
-                {answer.answer}
-                <Dropdown bind:selected={guess_player_list[i]} options={players} />
-            </div>
-        {/each}
-    </div>
-    <div>
-        <Button text="Submit" onClick={onSubmit} />
-    </div>
-    
-    <!-- <div>
-        <Button text="getGame" onClick={getGame} />
-    </div> -->
+    {#if !has_submitted}
+        <div>
+            {#each answers as answer, i}
+                <div>
+                    {answer.answer}
+                    <Dropdown bind:selected={guess_player_list[i]} options={players} />
+                </div>
+            {/each}
+        </div>
+        <div>
+            <Button text="Submit" onClick={onSubmit} />
+        </div>
+    {/if}
+    {#if has_submitted}
+        wait for the other people
+    {/if}
 </main>
