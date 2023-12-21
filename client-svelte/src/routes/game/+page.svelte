@@ -9,26 +9,34 @@
     let name: any;
     let game_name: any;
     let base_server_path: any;
+    let round_count: any;
     if (typeof localStorage !== "undefined") {
         if (localStorage.getItem("name") != null) {
             name = localStorage.getItem("name");
         }
         else {
-            name = ""
+            name = "";
         }
     
         if (localStorage.getItem("game_name") != null) {
             game_name = localStorage.getItem("game_name");
         }
         else {
-            game_name = ""
+            game_name = "";
         }
 
         if (localStorage.getItem("base_server_path") != null) {
             base_server_path = localStorage.getItem("base_server_path");
         }
         else {
-            base_server_path = ""
+            base_server_path = "";
+        }
+
+        if (localStorage.getItem("round_count") != null) {
+            round_count = localStorage.getItem("round_count");
+        }
+        else {
+            round_count = "";
         }
     }
 
@@ -113,6 +121,9 @@
     <Button text="print" onClick={print}/>
     <div>
         Game Room Name: {game_name}
+    </div>
+    <div>
+        Round: {round_count}
     </div>
     <div>
         {current_question}

@@ -32,6 +32,7 @@
     response.then((response) => {
       if (response.ok) {
         updateGlobal();
+        localStorage.setItem("round_count", "0");
         window.location.href = window.location.href + "game"
       }
       else {
@@ -68,6 +69,7 @@
     response.then((response) => {
       if (response.ok){
         updateGlobal();
+        localStorage.setItem("round_count", "0");
         window.location.href = window.location.href + "game"
       }
       else {

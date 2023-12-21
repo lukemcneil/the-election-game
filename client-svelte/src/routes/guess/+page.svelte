@@ -10,26 +10,34 @@
     let name: any;
     let game_name: any;
     let base_server_path: any;
+    let round_count: any;
     if (typeof localStorage !== "undefined") {
         if (localStorage.getItem("name") != null) {
             name = localStorage.getItem("name");
         }
         else {
-            name = ""
+            name = "";
         }
     
         if (localStorage.getItem("game_name") != null) {
             game_name = localStorage.getItem("game_name");
         }
         else {
-            game_name = ""
+            game_name = "";
         }
 
         if (localStorage.getItem("base_server_path") != null) {
             base_server_path = localStorage.getItem("base_server_path");
         }
         else {
-            base_server_path = ""
+            base_server_path = "";
+        }
+
+        if (localStorage.getItem("round_count") != null) {
+            round_count = localStorage.getItem("round_count");
+        }
+        else {
+            round_count = "";
         }
     }
 
@@ -55,11 +63,7 @@
     onMount(() => {
         getGameLoop();
     })
-
-    function print() {
-        console.log("here");
-    }
-
+    
     let game: Game;
     let players: Array<string> = [];
     let answers: Array<Answer> = [];
@@ -76,7 +80,8 @@
             if (answers.length == 0) {
                 answers = data.rounds[data.rounds.length - 1].answers;
             }
-            has_everybody_guessed = data.rounds[data.rounds.length - 1].guesses.length == players.length;
+            console.log(data.rounds[round_count].guesses.length);
+            has_everybody_guessed = data.rounds[round_count].guesses.length == players.length;
             if (has_everybody_guessed) {
                 window.location.href = localStorage.getItem("base_client_path") + "results";
             }
@@ -90,7 +95,7 @@
     }
 
     async function postGuess() {
-        console.log(JSON.stringify(guess));
+        // console.log(JSON.stringify(guess));
         const response: Response = await fetch(base_server_path + game_name + "/guess", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -104,7 +109,7 @@
         answers.forEach((answer, i) => {
             guess.answers.push(new Answer(guess_player_list[i], answer.answer));    
         });
-        console.log(guess);
+        // console.log(guess);
         const response: Promise<Response> = postGuess();
         response.then((response) => {
             if (response.ok) {
