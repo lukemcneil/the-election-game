@@ -7,13 +7,30 @@
     import { Round } from "$lib/datatypes/round";
 	import { onMount } from "svelte";
 
-    let name: string;
-    let game_name: string;
-    let base_server_path: string;
+    let name: any;
+    let game_name: any;
+    let base_server_path: any;
     if (typeof localStorage !== "undefined") {
-        name = JSON.parse(localStorage.getItem("name")!);
-        game_name = JSON.parse(localStorage.getItem("game_name")!);
-        base_server_path = JSON.parse(localStorage.getItem("base_server_path")!);
+        if (localStorage.getItem("name") != null) {
+            name = localStorage.getItem("name");
+        }
+        else {
+            name = ""
+        }
+    
+        if (localStorage.getItem("game_name") != null) {
+            game_name = localStorage.getItem("game_name");
+        }
+        else {
+            game_name = ""
+        }
+
+        if (localStorage.getItem("base_server_path") != null) {
+            base_server_path = localStorage.getItem("base_server_path");
+        }
+        else {
+            base_server_path = ""
+        }
     }
 
     let game: Game;
@@ -25,6 +42,7 @@
     let has_answered: boolean = false;
 
     async function getGameState() {
+        console.log(base_server_path);
         const response: Response = await fetch(base_server_path + game_name, {
             method: "GET",
             headers: {"Content-Type": "application/json"},
@@ -76,7 +94,7 @@
     async function getGameLoop() {
         getGame();
         await sleep(get_game_interval_ms);
-        // getGameLoop();
+        getGameLoop();
     }
 
     onMount(() => {
