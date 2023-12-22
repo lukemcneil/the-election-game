@@ -104,6 +104,8 @@
             players = game.players;
             rounds = game.rounds;
             has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
+            round_count = (data.rounds.length - 1).toString();
+            localStorage.setItem("round_count", round_count);
             if (has_everybody_answered) {
                 localStorage.setItem("has_answered", "false");
                 window.location.href = base_client_path + "guess";
@@ -170,6 +172,13 @@
             <Button text="Submit" onClick={onSubmitClick} />
         </div>
     {/if}
+
+    {#if has_answered == "true"}
+        <div>
+            Wait for the other players.
+        </div>
+    {/if}
+
     <div>
         Players:
     </div>
@@ -179,11 +188,6 @@
         </div>
     {/each}
 
-    {#if has_answered == "true"}
-    <div>
-        you have answered the question
-    </div>
-    {/if}
     {#if has_answered != "true"}
         <div>
             <Button text="Leave" onClick={onLeaveClick} />

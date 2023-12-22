@@ -32,7 +32,6 @@
     response.then((response) => {
       if (response.ok) {
         updateGlobal();
-        localStorage.setItem("round_count", "0");
         window.location.href = window.location.href + "game"
       }
       else {
@@ -100,6 +99,7 @@
     }
     localStorage.setItem("has_answered", "false");
     localStorage.setItem("has_guessed", "false");
+    localStorage.setItem("round_count", "");
   })
 </script>
 
