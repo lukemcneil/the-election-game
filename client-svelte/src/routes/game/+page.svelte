@@ -9,6 +9,7 @@
     let name: any;
     let game_name: any;
     let base_server_path: any;
+    let base_client_path: any;
     let round_count: any;
     let has_answered: any = "false";
     if (typeof localStorage !== "undefined") {
@@ -33,6 +34,13 @@
             base_server_path = "";
         }
 
+        if (localStorage.getItem("base_client_path") != null) {
+            base_client_path = localStorage.getItem("base_client_path");
+        }
+        else {
+            base_client_path = "";
+        }
+        
         if (localStorage.getItem("round_count") != null) {
             round_count = localStorage.getItem("round_count");
         }
@@ -98,7 +106,7 @@
             has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
             if (has_everybody_answered) {
                 localStorage.setItem("has_answered", "false");
-                window.location.href = localStorage.getItem("base_client_path") + "guess";
+                window.location.href = base_client_path + "guess";
             }
             current_question = game.rounds[rounds.length - 1].question;
         })
@@ -118,6 +126,29 @@
     onMount(() => {
         getGameLoop();
     })
+
+    async function deleteMyself() {
+        console.log(base_server_path + game_name + "/exit");
+        const response: Response = await fetch(base_server_path + game_name + "/exit", {
+            method: "DELETE",
+            mode: "no-cors",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                player: name,
+            })
+        })
+        return response;
+    }
+
+    function onLeaveClick() {
+        window.location.href = base_client_path;
+        // let response: Promise<Response> = deleteMyself();
+        // response.then((response) => {
+        //     if (response.ok) {
+        //         window.location.href = base_client_path;
+        //     }
+        // })
+    }
 </script>
 
 <main>
@@ -151,6 +182,11 @@
     <div>
         you have answered the question
     </div>
+    {/if}
+    {#if has_answered != "true"}
+        <div>
+            <Button text="Leave" onClick={onLeaveClick} />
+        </div>
     {/if}
 
 </main>

@@ -132,7 +132,7 @@ Submit guesses of each players answers for the current round an behalf of the sp
 | 200 (Ok)        | empty         | Successfully submitted the guesses                                                               |
 | 404 (Not Found) | empty         | A game with the specified game id does not exist or the specified player is not part of the game |
 
-#### (`DELETE`) `/api/v1/game/<game_id>` - Body<[Player](#player)>
+#### (`DELETE`) `/api/v1/game/<game_id>/exit` - Body<[Player](#player)>
 
 Remove a player from the game.
 
@@ -142,6 +142,17 @@ Remove a player from the game.
 | --------------- | ------------- | ------------------------------------------------------------------------------------------------ |
 | 200 (Ok)        | empty         | Successfully removed the player from the game                                                    |
 | 404 (Not Found) | empty         | A game with the specified game id does not exist or the specified player is not part of the game |
+
+Delete a game.
+
+#### (`DELETE`) `/api/v1/game/<game_id>`
+
+**Response**
+
+| Status Code     | Response Body | Description                                                                                      |
+| --------------- | ------------- | ------------------------------------------------------------------------------------------------ |
+| 200 (Ok)        | empty         | Successfully deleted the game                                                                    |
+| 404 (Not Found) | empty         | A game with the specified game id does not exist                                                 |
 
 ### Client Screens
 
