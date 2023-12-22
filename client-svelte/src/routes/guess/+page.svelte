@@ -163,6 +163,8 @@
         </div>
     {/if}
     {#if has_guessed == "true"}
-        wait for the other people
+        <div>
+            wait for the other people
+        </div>
     {/if}
 </main>
