@@ -86,8 +86,14 @@
     })
 </script>
 
+<style>
+  @import '../../app.css';
+</style>
+
 <main>
-    This is where we will see the results.
+    <h2>
+        Results
+    </h2>
     <div>
         {#each answers as answer}
             {#if answer.player != name}

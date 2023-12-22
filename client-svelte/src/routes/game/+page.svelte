@@ -151,13 +151,14 @@
     }
 </script>
 
+<style>
+  @import '../../app.css';
+</style>
+
 <main>
-    <div>
-        Game Room Name: {game_name}
-    </div>
-    <div>
+    <h2>
         Round: {round_count}
-    </div>
+    </h2>
     <div>
         {current_question}
     </div>

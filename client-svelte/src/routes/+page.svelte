@@ -103,26 +103,30 @@
   })
 </script>
 
+<style>
+  @import '../app.css';
+</style>
+
 <main>
   <h1>Weight Inquiries</h1>
 
-  <div class="card">
+  <div>
     <InputField bind:value="{name}" text="enter your name" />
   </div>
 
-  <div class="card">
+  <div>
     <InputField bind:value="{game_name}" text="enter the game room"/>
   </div>
   
-  <div class="card">
+  <div>
     <Button text="Join Game" onClick={onClickJoinGame} />
   </div>
 
-  <div class="card">
+  <div>
     <Button text="Create Game" onClick={onClickCreateGame}/>
   </div>
 
-  <div class="card">
+  <div>
     {error_message}
   </div>
 

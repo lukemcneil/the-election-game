@@ -139,10 +139,14 @@
     }
 </script>
 
+<style>
+  @import '../../app.css';
+</style>
+
 <main>
-    <div>
-        This is the page for guessing who said what
-    </div>
+    <h2>
+       Guess who said what
+    </h2>
     {#if has_guessed != "true"}
         <div>
             {#each answers as answer, i}
