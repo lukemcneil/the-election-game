@@ -98,6 +98,8 @@
     else {
       localStorage.setItem("base_server_path", production_url);
     }
+    localStorage.setItem("has_answered", "false");
+    localStorage.setItem("has_guessed", "false");
   })
 </script>
 

@@ -10,6 +10,7 @@
     let game_name: any;
     let base_server_path: any;
     let round_count: any;
+    let has_answered: any = "false";
     if (typeof localStorage !== "undefined") {
         if (localStorage.getItem("name") != null) {
             name = localStorage.getItem("name");
@@ -38,6 +39,13 @@
         else {
             round_count = "";
         }
+
+        if (localStorage.getItem("has_answered") != null) {
+            has_answered = localStorage.getItem("has_answered");
+        }
+        else {
+            has_answered = "";
+        }
     }
 
     let game: Game;
@@ -46,7 +54,6 @@
     
     let current_question: string | undefined = "";
     let answer: string = "";
-    let has_answered: boolean = false;
     let has_everybody_answered: boolean = false;
 
     async function getGameState() {
@@ -65,8 +72,8 @@
         const response: Promise<Response> = postAnswer(); 
         response.then((response) => {
             if (response.ok) {
-                // window.location.href = localStorage.getItem("base_client_path") + "wait"
-                has_answered = true;
+                has_answered = "true";
+                localStorage.setItem("has_answered", "true");
             }
         })
     }
@@ -90,6 +97,7 @@
             rounds = game.rounds;
             has_everybody_answered = game.rounds[game.rounds.length - 1].answers.length == game.players.length;
             if (has_everybody_answered) {
+                localStorage.setItem("has_answered", "false");
                 window.location.href = localStorage.getItem("base_client_path") + "guess";
             }
             current_question = game.rounds[rounds.length - 1].question;
@@ -122,7 +130,7 @@
     <div>
         {current_question}
     </div>
-    {#if !has_answered}
+    {#if has_answered != "true"}
         <div>
             <InputField bind:value="{answer}" text="enter your answer" />
         </div>
@@ -139,7 +147,7 @@
         </div>
     {/each}
 
-    {#if has_answered}
+    {#if has_answered == "true"}
     <div>
         you have answered the question
     </div>

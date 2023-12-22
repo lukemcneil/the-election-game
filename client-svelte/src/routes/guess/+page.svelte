@@ -11,6 +11,7 @@
     let game_name: any;
     let base_server_path: any;
     let round_count: any;
+    let has_guessed: any = "false";
     if (typeof localStorage !== "undefined") {
         if (localStorage.getItem("name") != null) {
             name = localStorage.getItem("name");
@@ -38,6 +39,13 @@
         }
         else {
             round_count = "";
+        }
+
+        if (localStorage.getItem("has_guessed") != null) {
+            has_guessed = localStorage.getItem("has_guessed");
+        }
+        else {
+            has_guessed = "";
         }
     }
 
@@ -71,7 +79,6 @@
     let rounds: Array<Round> = [];
     let guess_player_list: Array<string> = [];
     let guess: Guess = new Guess(name, []);
-    let has_submitted: boolean = false;
     let has_everybody_guessed: boolean = false;
 
     async function getGame() {
@@ -90,6 +97,7 @@
             console.log(data.rounds[round_count].guesses.length);
             has_everybody_guessed = data.rounds[round_count].guesses.length == players.length;
             if (has_everybody_guessed) {
+                localStorage.setItem("has_guessed", "false");
                 window.location.href = localStorage.getItem("base_client_path") + "results";
             }
             rounds = game.rounds;
@@ -116,8 +124,8 @@
         const response: Promise<Response> = postGuess();
         response.then((response) => {
             if (response.ok) {
-                console.log("ok");
-                has_submitted = true;
+                has_guessed = "true";
+                localStorage.setItem("has_guessed", "true");
             }
             else {
                 console.log("not ok");
@@ -135,7 +143,7 @@
     <div>
         This is the page for guessing who said what
     </div>
-    {#if !has_submitted}
+    {#if has_guessed != "true"}
         <div>
             {#each answers as answer, i}
                 {#if answer.player != name}
@@ -150,7 +158,7 @@
             <Button text="Submit" onClick={onSubmit} />
         </div>
     {/if}
-    {#if has_submitted}
+    {#if has_guessed == "true"}
         wait for the other people
     {/if}
 </main>
