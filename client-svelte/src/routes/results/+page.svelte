@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
-	import PlayerList from "$lib/PlayerList.svelte";
 	import type { Answer } from "$lib/datatypes/answer";
-	import type { Game } from "$lib/datatypes/game";
 	import type { Guess } from "$lib/datatypes/guess";
+	import { Score } from "$lib/datatypes/score";
 	import { onMount } from "svelte";
 
     let name: any;
@@ -54,13 +53,33 @@
         return response;
     }
 
+    async function getScore() {
+        const response: Response = await fetch(base_server_path + game_name + "/score", {
+            method: "GET",
+            headers: {"Content-Type": "application/json"},
+        })
+        return response;
+    }
+    let scores: Array<Score> = [];
+
+    function updateScore(score: Score) {
+        scores = [...scores, score];
+    }
+
+    function getScores() {
+        getScore().then((response) => response.json()).then((data) => {
+            for (var prop in data) {
+                updateScore(new Score(prop, data[prop]));
+            }
+        })
+    }
+
     let answers: Array<Answer> = [];
     let correct_answer_map: Map<string, string> = new Map();
     let my_guess: Array<Answer> = [];
     let my_guess_map: Map<string, string> = new Map();
     async function getGame() {
         getGameState().then((response) => response.json()).then((data) => {
-            console.log(data);
 
             answers = data.rounds[round_count].answers;
             answers.forEach((answer: Answer) => {
@@ -76,13 +95,12 @@
                 my_guess_map.set(answer.player, answer.answer);
             })
 
-            console.log(answers);
-            console.log(my_guess);
         })
     }
 
     onMount(() => {
         getGame();
+        getScores();
     })
 </script>
 
@@ -106,6 +124,13 @@
                     {/if}
                 </div>
             {/if}
+        {/each}
+    </div>
+    <div>
+        {#each scores as score}
+            <div>
+                {score.player}: {score.score}
+            </div>
         {/each}
     </div>
     <div>
