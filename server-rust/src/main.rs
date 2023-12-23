@@ -15,9 +15,10 @@ use rocket::{
 };
 use rocket_contrib::{json::Json, serve::StaticFiles};
 use rocket_cors::{AllowedOrigins, CorsOptions};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use types::{Answer, Game, Guess, PlayerData, Result};
+use types::{Answer, Game, Guess, Player, PlayerData, Result};
 
 type Games = Mutex<types::Games>;
 type Questions = Mutex<QuestionLookup>;
@@ -98,6 +99,28 @@ fn delete_game(game_id: String, games: State<Games>) {
     games.delete(&game_id)
 }
 
+#[get("/game/<game_id>/score")]
+fn get_score(game_id: String, games: State<Games>) -> Result<Json<HashMap<Player, i32>>> {
+    let mut games = games.lock();
+    let game = games.get(&game_id)?.clone();
+    let mut scores = HashMap::new();
+    for player in game.players {
+        scores.insert(player, 0);
+    }
+    for round in game.rounds {
+        for guess in round.guesses {
+            for answer in guess.answers {
+                if round.answers.contains(&answer) {
+                    scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() + 1);
+                } else {
+                    scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() - 1);
+                }
+            }
+        }
+    }
+    Ok(Json(scores))
+}
+
 fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     let mut questions = QuestionLookup::default();
     let rocket = if let Some(opt) = opt {
@@ -146,7 +169,8 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
                 answer,
                 guess,
                 exit_game,
-                delete_game
+                delete_game,
+                get_score,
             ],
         )
         .manage(Mutex::new(questions))

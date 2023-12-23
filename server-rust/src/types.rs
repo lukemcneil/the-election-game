@@ -80,7 +80,7 @@ pub(crate) struct Answer {
     /// The player who gave the answer
     player: Player,
     /// The answer to the question for the round
-    answer: String,
+    pub answer: String,
 }
 
 #[cfg(test)]
@@ -96,9 +96,9 @@ impl Answer {
 #[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct Guess {
     /// The player making the guess
-    player: Player,
+    pub player: Player,
     /// The list of guessed answers, one per player
-    answers: HashSet<Answer>,
+    pub answers: HashSet<Answer>,
 }
 
 #[cfg(test)]
