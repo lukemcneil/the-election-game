@@ -1,4 +1,4 @@
-use crate::types::{Answer, BadRequest, Error, Guess};
+use crate::types::{BadRequest, Error, Guess};
 use rocket::{
     http::{ContentType, Status},
     request::Request,
@@ -9,20 +9,7 @@ use std::{
     io::Cursor,
 };
 
-impl Hash for Answer {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.player.hash(state);
-    }
-}
-
-impl PartialEq for Answer {
-    fn eq(&self, other: &Self) -> bool {
-        self.player == other.player
-    }
-}
-
-impl Eq for Answer {}
-
+// TODO: This is terrible and should be removed but looks like HashSet does not impl Hash
 impl Hash for Guess {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.player.hash(state);

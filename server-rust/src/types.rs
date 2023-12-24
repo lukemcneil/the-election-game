@@ -75,7 +75,7 @@ impl PlayerData {
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub(crate) struct Answer {
     /// The player who gave the answer
     player: Player,
@@ -93,7 +93,7 @@ impl Answer {
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) struct Guess {
     /// The player making the guess
     pub player: Player,
@@ -252,16 +252,12 @@ impl Game {
     pub fn get_score(&self) -> HashMap<String, i32> {
         let mut scores = HashMap::new();
         let game = self.clone();
-        for player in game.players {
-            scores.insert(player, 0);
-        }
         for round in game.rounds {
             for guess in round.guesses {
                 for answer in guess.answers {
+                    let score = scores.entry(guess.player.clone()).or_insert(0);
                     if round.answers.contains(&answer) {
-                        scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() + 1);
-                    } else {
-                        scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() - 1);
+                        *score += 1;
                     }
                 }
             }
