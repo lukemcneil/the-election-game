@@ -248,6 +248,26 @@ impl Game {
         let round = self.current_round();
         round.state(players)
     }
+
+    pub fn get_score(&self) -> HashMap<String, i32> {
+        let mut scores = HashMap::new();
+        let game = self.clone();
+        for player in game.players {
+            scores.insert(player, 0);
+        }
+        for round in game.rounds {
+            for guess in round.guesses {
+                for answer in guess.answers {
+                    if round.answers.contains(&answer) {
+                        scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() + 1);
+                    } else {
+                        scores.insert(guess.player.clone(), scores.get(&guess.player).unwrap() - 1);
+                    }
+                }
+            }
+        }
+        scores
+    }
 }
 
 #[derive(Default)]

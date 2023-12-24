@@ -1,3 +1,5 @@
+use std::{collections::HashMap};
+
 use crate::{rocket, types::PlayerData, Answer, Game, Guess};
 use rocket::{http::Status, local::Client};
 
@@ -103,4 +105,95 @@ fn simple_game() {
     // Delete the game
     let res = client.get("/api/v1/game/my_game").dispatch();
     assert_eq!(res.status(), Status::BadRequest);
+}
+
+#[test]
+fn test_get_score() {
+    let json_data = r#"
+    {
+        "players": [
+            "p1",
+            "p2"
+        ],
+        "rounds": [
+            {
+                "question": "What are you thankful you're not doing right now? ",
+                "answers": [
+                    {
+                        "player": "p1",
+                        "answer": "ijaefa"
+                    },
+                    {
+                        "player": "p2",
+                        "answer": "dlkamf"
+                    }
+                ],
+                "guesses": [
+                    {
+                        "player": "p1",
+                        "answers": [
+                            {
+                                "player": "p2",
+                                "answer": "dlkamf"
+                            }
+                        ]
+                    },
+                    {
+                        "player": "p2",
+                        "answers": [
+                            {
+                                "player": "p1",
+                                "answer": "ijaefa"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "question": "What would be a great annual tradition? ",
+                "answers": [
+                    {
+                        "player": "p1",
+                        "answer": "f"
+                    },
+                    {
+                        "player": "p2",
+                        "answer": "f"
+                    }
+                ],
+                "guesses": [
+                    {
+                        "player": "p1",
+                        "answers": [
+                            {
+                                "player": "p2",
+                                "answer": "f"
+                            }
+                        ]
+                    },
+                    {
+                        "player": "p2",
+                        "answers": [
+                            {
+                                "player": "p1",
+                                "answer": "f"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "question": "What word or phrase is always fun to say?",
+                "answers": [],
+                "guesses": []
+            }
+        ]
+    }
+    "#;
+    let game: Game = serde_json::from_str(json_data).unwrap();
+    game.get_score();
+    let mut correct_scores = HashMap::new();
+    correct_scores.insert(String::from("p1"), 2); 
+    correct_scores.insert(String::from("p2"), 2); 
+    assert_eq!(game.get_score(), correct_scores)
 }
