@@ -258,6 +258,8 @@ impl Game {
                     let score = scores.entry(guess.player.clone()).or_insert(0);
                     if round.answers.contains(&answer) {
                         *score += 1;
+                    } else {
+                        *score -= 1;
                     }
                 }
             }
