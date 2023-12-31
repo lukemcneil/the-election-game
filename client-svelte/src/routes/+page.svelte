@@ -1,133 +1,81 @@
 <script lang="ts">
-  import InputField from '../lib/InputField.svelte';
-  import Button from '../lib/Button.svelte'
+	import Button from '$lib/Button.svelte';
+	import Join from '$lib/menus/Join.svelte';
+	import Answer from '$lib/menus/Answer.svelte';
 	import { onMount } from 'svelte';
-  
-  let production_url = "https://weight-inquiries.onrender.com/api/v1/game/"
-  let test_url: string = "http://0.0.0.0:8172/api/v1/game/"
-  
-  let name: string = "";
-  let game_name: string = "";
+	import AnswerWait from '$lib/menus/AnswerWait.svelte';
+	import Guess from '$lib/menus/Guess.svelte';
+	import GuessWait from '$lib/menus/GuessWait.svelte';
+	import Results from '$lib/menus/Results.svelte';
 
-  let error_message = "";
-  let no_name_error_message = "no name";
-  let no_game_room_error_message = "no game room name";
-  let game_already_exists_error_message = "this game already exists";
+	let game_state: string | null;
 
-  function updateGlobal() {
-    localStorage.setItem("name", name);
-    localStorage.setItem("game_name", game_name);
-  }
+	let production_url: string = 'https://weight-inquiries.onrender.com/api/v1/game/';
+	let test_url: string = 'http://0.0.0.0:8172/api/v1/game/';
 
-  async function onClickCreateGame() {
-    if (name == "") {
-      error_message = no_name_error_message;
-      return;
-    }
-    if (game_name == "") {
-      error_message = no_game_room_error_message;
-      return;
-    }
-    const response: Promise<Response> = createGameRequest();
-    response.then((response) => {
-      if (response.ok) {
-        updateGlobal();
-        window.location.href = window.location.href + "game"
-      }
-      else {
-        console.log(response.status);
-        if (response.status == 409) {
-          error_message = game_already_exists_error_message;
-        }
-        error_message = "some other error when making a game";
-      }
-    })
-  }
+	function setGameState(new_state: string) {
+		localStorage.setItem('game_state', new_state);
+		game_state = new_state;
+	}
 
-  async function createGameRequest() {
-    const response: Response = await fetch(localStorage.getItem("base_server_path") + game_name, {
-      method: "PUT",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        player: name
-      })
-    })
-    return response;
-  }
+	onMount(() => {
+		if (!localStorage.getItem('game_state')) {
+			setGameState('join');
+		} else {
+			game_state = localStorage.getItem('game_state');
+		}
+		if (window.location.href == 'http://localhost:5173/') {
+			localStorage.setItem('base_server_path', test_url);
+		} else {
+			localStorage.setItem('base_server_path', production_url);
+		}
+	});
 
-  async function onClickJoinGame() {
-    if (name == "") {
-      error_message = no_name_error_message;
-      return;
-    }
-    if (game_name == "") {
-      error_message = no_game_room_error_message;
-      return;
-    }
-    const response: Promise<Response> = joinGameRequest();
-    response.then((response) => {
-      if (response.ok){
-        updateGlobal();
-        localStorage.setItem("round_count", "0");
-        window.location.href = window.location.href + "game"
-      }
-      else {
-        console.log("failed to join game " + game_name);
-      }
-    })
-  }
-
-  async function joinGameRequest() {
-    const request = await fetch(localStorage.getItem("base_server_path") + game_name, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        player: name
-      })
-    })
-    return request;
-  }
-
-  onMount(() => {
-    localStorage.setItem("base_client_path", window.location.href);
-    console.log(window.location.href);
-    if (window.location.href == "http://localhost:5173/") {
-      localStorage.setItem("base_server_path", test_url);
-    }
-    else {
-      localStorage.setItem("base_server_path", production_url);
-    }
-    localStorage.setItem("has_answered", "false");
-    localStorage.setItem("has_guessed", "false");
-    localStorage.setItem("round_count", "");
-  })
+	function reset() {
+		if (confirm('Do you really want to leave the game?') == true) {
+			setGameState('join');
+		}
+	}
 </script>
 
-<style>
-  @import '../app.css';
-</style>
-
 <main>
-  <h1>Weight Inquiries</h1>
+	<!-- {#if score_header_states.has(game_state)}
+		<ScoreHeader
+			name={localStorage.getItem('name')}
+			game_name={localStorage.getItem('game_name')}
+		/>
+	{/if} -->
 
-  <div>
-    <InputField bind:value="{name}" text="enter your name" />
-  </div>
-
-  <div>
-    <InputField bind:value="{game_name}" text="enter the game room"/>
-  </div>
-  
-  <div>
-    <Button text="Join Game" onClick={onClickJoinGame} />
-  </div>
-
-  <div>
-    <Button text="Create Game" onClick={onClickCreateGame}/>
-  </div>
-
-  <div>
-    {error_message}
-  </div>
-
+	{#if game_state == 'join'}
+		<Join {setGameState} />
+	{:else if game_state == 'answer'}
+		<Answer
+			{setGameState}
+			name={localStorage.getItem('name')}
+			game_name={localStorage.getItem('game_name')}
+		/>
+	{:else if game_state == 'answer_wait'}
+		<AnswerWait {setGameState} game_name={localStorage.getItem('game_name')} />
+	{:else if game_state == 'guess'}
+		<Guess
+			{setGameState}
+			name={localStorage.getItem('name')}
+			game_name={localStorage.getItem('game_name')}
+		/>
+	{:else if game_state == 'guess_wait'}
+		<GuessWait {setGameState} game_name={localStorage.getItem('game_name')} />
+	{:else if game_state == 'results'}
+		<Results
+			{setGameState}
+			name={localStorage.getItem('name')}
+			game_name={localStorage.getItem('game_name')}
+		/>
+	{/if}
+	<div style="padding-top: 10em;">
+		<Button text="Leave Game" onClick={reset} />
+	</div>
 </main>
+
+<style>
+	@import '../app.css';
+</style>
