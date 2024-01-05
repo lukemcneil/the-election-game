@@ -133,7 +133,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     let cors = CorsOptions::default()
         .allowed_origins(AllowedOrigins::all())
         .allowed_methods(
-            vec![Method::Get, Method::Post, Method::Patch, Method::Put]
+            vec![Method::Get, Method::Post, Method::Patch, Method::Put, Method::Delete]
                 .into_iter()
                 .map(From::from)
                 .collect(),

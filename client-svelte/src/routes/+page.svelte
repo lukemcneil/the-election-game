@@ -1,12 +1,16 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import { onMount } from 'svelte';
 	import Join from '$lib/menus/Join.svelte';
 	import Answer from '$lib/menus/Answer.svelte';
-	import { onMount } from 'svelte';
 	import AnswerWait from '$lib/menus/AnswerWait.svelte';
 	import Guess from '$lib/menus/Guess.svelte';
 	import GuessWait from '$lib/menus/GuessWait.svelte';
 	import Results from '$lib/menus/Results.svelte';
+	import GameFooter from '$lib/menus/GameFooter.svelte';
+
+	import { deletePlayerFromGame } from '$lib/functions/requests';
+	import Button from '$lib/Button.svelte';
+	import InputField from '$lib/InputField.svelte';
 
 	let game_state: string | null;
 
@@ -31,10 +35,32 @@
 		}
 	});
 
-	function reset() {
+	let player_to_kick: string;
+
+	function onLeave() {
 		if (confirm('Do you really want to leave the game?') == true) {
-			setGameState('join');
+			const response: Promise<Response> = deletePlayerFromGame(localStorage.getItem('game_name'), localStorage.getItem('name'));
+			response.then((response) => {
+				if (response.ok) {
+					setGameState('join');
+				} else {
+					setGameState('join');
+				}
+			});
 		}
+	}
+
+	function onKick() {
+		if (player_to_kick.length == 0) {
+			return;
+		}
+		if (confirm('Do you really what to kick ' + player_to_kick + '?') == true) {
+			const response: Promise<Response> = deletePlayerFromGame(localStorage.getItem('game_name'), player_to_kick); 
+		}
+	}
+
+	function reset() {
+		setGameState('join');
 	}
 </script>
 
@@ -71,9 +97,15 @@
 			game_name={localStorage.getItem('game_name')}
 		/>
 	{/if}
-	<div style="padding-top: 10em;">
-		<Button text="Leave Game" onClick={reset} />
-	</div>
+	{#if game_state != 'join'}
+		<div style="padding-top: 10em;">
+			<Button text="Leave Game" onClick={onLeave} />
+		</div>
+		<div>
+			<InputField bind:value={player_to_kick} text="player to kick" />
+			<Button text="Kick" onClick={onKick} />
+		</div>
+	{/if}
 </main>
 
 <style>

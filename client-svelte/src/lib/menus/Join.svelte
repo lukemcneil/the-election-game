@@ -78,3 +78,7 @@
 		{error_message}
 	</div>
 </main>
+
+<style>
+	@import '../../app.css';
+</style>

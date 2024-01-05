@@ -46,10 +46,9 @@ export async function postAnswer(game_name: string | null, name: string | null, 
 	return response;
 }
 
-export async function deletePlayerFromGame(game_name: string, name: string) {
+export async function deletePlayerFromGame(game_name: string | null, name: string | null) {
 	const response: Response = await fetch(getBaseServerPath() + game_name + '/exit', {
 		method: 'DELETE',
-		mode: 'no-cors',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			player: name
