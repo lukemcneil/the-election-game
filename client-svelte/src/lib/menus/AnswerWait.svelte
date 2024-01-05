@@ -9,11 +9,10 @@
 	export let setGameState: (new_state: string) => void;
 	export let game_name: string | null;
 
-	let players: Array<Player> = [];
+	let players: Array<string> = [];
 	let current_question: string | undefined = '';
 	let round_count: number;
-
-	let answer: string = '';
+	let waiting_for: Array<string> = [];
 
 	async function readGame() {
 		getGame(game_name)
@@ -22,8 +21,17 @@
 				players = data.players;
 				current_question = data.rounds[data.rounds.length - 1].question;
 				round_count = data.rounds.length;
+				console.log(data);
 				if (data.rounds[data.rounds.length - 1].answers.length == players.length) {
 					setGameState('guess');
+				} else {
+					waiting_for = players.filter(
+						(player) =>
+							!data.rounds[data.rounds.length - 1].answers.some(
+								(answer) => answer.player === player
+							)
+					);
+					console.log(waiting_for);
 				}
 			});
 	}
@@ -47,15 +55,14 @@
 		Round: {round_count}
 	</h2>
 	<h3>Waiting on players...</h3>
-	<div>
-		{current_question}
-	</div>
-	<div>Players:</div>
-	{#each players as player}
+	{#each waiting_for as player}
 		<div>
 			{player}
 		</div>
 	{/each}
+	<div>
+		{current_question}
+	</div>
 </main>
 
 <style>

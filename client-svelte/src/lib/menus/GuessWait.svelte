@@ -10,7 +10,7 @@
 
 	let question: string;
 	let players: Array<string> = [];
-	// let other_players: Array<string> = [];
+	let waiting_for: Array<string> = [];
 
 	async function readGame() {
 		getGame(game_name)
@@ -20,7 +20,11 @@
 				players = data.players;
                 if (data.rounds[data.rounds.length - 1].guesses.length == 0) {
                     setGameState('results');
-                }
+                } else {
+					waiting_for = players.filter(
+						(player) => !data.rounds[data.rounds.length - 1].guesses.some((guess) => guess.player === player)
+					);
+				}
 				// players.forEach((player: string) => {
 				// 	if (player != name) {
 				// 		other_players.push(player);
@@ -46,17 +50,12 @@
 <main>
 	<h2>Guess who said what</h2>
     <h3>Waiting for other players...</h3>
+	{#each waiting_for as player}
+		<div>
+			{player}
+		</div>
+	{/each}
 	<div>{question}</div>
-	<!-- <div>
-		{#each answers as answer, i}
-			{#if answer.player != name}
-				<div>
-					{answer.answer}
-					<Dropdown bind:selected={guess_player_list[i]} options={players} />
-				</div>
-			{/if}
-		{/each}
-	</div> -->
 </main>
 
 <style>
