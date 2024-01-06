@@ -6,7 +6,7 @@
 	import { Guess } from '$lib/datatypes/guess';
 	import { getGame, postGuess } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
-	import Dropdown from '$lib/Dropdown.svelte';
+	import Matching from '$lib/Matching.svelte';
 
 	export let setGameState: (new_state: string) => void;
 	export let name: string | null;
@@ -19,19 +19,25 @@
 	let rounds: Array<Round> = [];
 	let guess_player_list: Array<string> = [];
 	let guess: Guess = new Guess(name, []);
+	let baskets: Array<{ name: string; item: string }> = [];
 
 	async function readGame() {
 		getGame(game_name)
 			.then((response) => response.json())
 			.then((data) => {
-                question = data.rounds[data.rounds.length - 1].question;
-				players = data.players;
-                answers = data.rounds[data.rounds.length - 1].answers;
-				// players.forEach((player: string) => {
-				// 	if (player != name) {
-				// 		other_players.push(player);
-				// 	}
-				// });
+				question = data.rounds[data.rounds.length - 1].question;
+				if (players.length == 0) {
+					players = data.players;
+				}
+				answers = data.rounds[data.rounds.length - 1].answers;
+
+				if (baskets.length == 0) {
+					answers.forEach((answer) => {
+						if (answer.player != name) {
+							baskets = [...baskets, { name: answer.answer, item: '' }];
+						}
+					});
+				}
 			});
 	}
 
@@ -49,10 +55,13 @@
 	});
 
 	function onSubmit() {
-		answers.forEach((answer, i) => {
-			if (answer.player != name) {
-				guess.answers.push(new Answer(guess_player_list[i], answer.answer));
+		for (let i = 0; i < baskets.length; i++) {
+			if (baskets[i].item == '') {
+				return;
 			}
+		}
+		baskets.forEach((basket, i) => {
+			guess.answers.push(new Answer(basket.item, basket.name));
 		});
 		const response: Promise<Response> = postGuess(game_name, guess);
 		response.then((response) => {
@@ -66,16 +75,7 @@
 <main>
 	<h2>Guess who said what</h2>
 	<div>{question}</div>
-	<div>
-		{#each answers as answer, i}
-			{#if answer.player != name}
-				<div>
-					{answer.answer}
-					<Dropdown bind:selected={guess_player_list[i]} options={players} />
-				</div>
-			{/if}
-		{/each}
-	</div>
+	<Matching {baskets} players={players.filter((e) => e !== name)} />
 	<div>
 		<Button text="Submit" onClick={onSubmit} />
 	</div>
