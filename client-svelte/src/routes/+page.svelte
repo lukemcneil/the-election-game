@@ -39,7 +39,10 @@
 
 	function onLeave() {
 		if (confirm('Do you really want to leave the game?') == true) {
-			const response: Promise<Response> = deletePlayerFromGame(localStorage.getItem('game_name'), localStorage.getItem('name'));
+			const response: Promise<Response> = deletePlayerFromGame(
+				localStorage.getItem('game_name'),
+				localStorage.getItem('name')
+			);
 			response.then((response) => {
 				if (response.ok) {
 					setGameState('join');
@@ -50,12 +53,21 @@
 		}
 	}
 
+	function unsafe_leave() {
+		if (confirm('This could ruin the game for the other players. Do you still want to leave?')) {
+			setGameState('join');
+		}
+	}
+
 	function onKick() {
 		if (player_to_kick.length == 0) {
 			return;
 		}
 		if (confirm('Do you really what to kick ' + player_to_kick + '?') == true) {
-			const response: Promise<Response> = deletePlayerFromGame(localStorage.getItem('game_name'), player_to_kick); 
+			const response: Promise<Response> = deletePlayerFromGame(
+				localStorage.getItem('game_name'),
+				player_to_kick
+			);
 		}
 	}
 

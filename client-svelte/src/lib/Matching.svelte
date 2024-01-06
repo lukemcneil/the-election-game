@@ -83,9 +83,12 @@
 </ul>
 
 <style>
-	@import '../app.css';
+	/* @import '../app.css'; */
+  div {
+    text-align: center;
+  }
 	.hovering {
-		border-color: lightgreen;
+		border-color: cornflowerblue;
 	}
 	.item {
 		display: inline; /* required for flip to work */
@@ -98,7 +101,7 @@
 		padding: 10px;
 	}
 	li:hover {
-		background: lightgreen;
+		background: cornflowerblue;
 		color: white;
 	}
 	ul {
