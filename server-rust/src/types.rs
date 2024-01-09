@@ -151,6 +151,10 @@ impl Round {
             panic!("Round in unknown state")
         }
     }
+
+    fn change_question(&mut self, new_question: String) -> () {
+        self.question = new_question;
+    }
 }
 
 #[derive(Clone, Default, Deserialize, Serialize)]
@@ -265,6 +269,10 @@ impl Game {
             }
         }
         scores
+    }
+
+    pub fn change_question(&mut self, new_question: String) -> () {
+        self.rounds.last_mut().unwrap().change_question(new_question);
     }
 }
 

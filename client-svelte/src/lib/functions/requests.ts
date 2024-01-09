@@ -73,3 +73,11 @@ export async function getScore(game_name: string | null) {
 	});
 	return response;
 }
+
+export async function postChangeQuestion(game_name: string | null) {
+	const response: Response = await fetch(getBaseServerPath() + game_name + '/change_question', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' }
+	});
+	return response;
+}

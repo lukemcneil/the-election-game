@@ -3,7 +3,7 @@
 	import InputField from '$lib/InputField.svelte';
 	import { Player } from '$lib/datatypes/player';
 	import { onMount } from 'svelte';
-	import { getGame, postAnswer } from '$lib/functions/requests';
+	import { getGame, postAnswer, postChangeQuestion } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
 
 	export let setGameState: (new_state: string) => void;
@@ -51,12 +51,19 @@
 	onMount(() => {
 		getGameLoop();
 	});
+
+	function onChangeQuestion() {
+		const response: Promise<Response> = postChangeQuestion(game_name);
+	}
 </script>
 
 <main>
 	<h2>
 		Round: {round_count}
 	</h2>
+	<div>
+		<Button text="Change Question" onClick={onChangeQuestion} />
+	</div>
 	<div>
 		{current_question}
 	</div>

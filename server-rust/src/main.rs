@@ -106,6 +106,14 @@ fn get_score(game_id: String, games: State<Games>) -> Result<Json<HashMap<Player
     Ok(Json(game.get_score()))
 }
 
+#[post("/game/<game_id>/change_question")]
+fn change_question(game_id: String, games: State<Games>, questions: State<Questions>) -> Result<()> {
+    let mut games = games.lock();
+    let game = games.get(&game_id)?;
+    game.change_question(questions.lock().get());
+    Ok(())
+}
+
 fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     let mut questions = QuestionLookup::default();
     let rocket = if let Some(opt) = opt {
@@ -156,6 +164,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
                 exit_game,
                 delete_game,
                 get_score,
+                change_question,
             ],
         )
         .manage(Mutex::new(questions))
