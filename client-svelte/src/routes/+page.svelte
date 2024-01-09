@@ -6,9 +6,8 @@
 	import Guess from '$lib/menus/Guess.svelte';
 	import GuessWait from '$lib/menus/GuessWait.svelte';
 	import Results from '$lib/menus/Results.svelte';
-	import GameFooter from '$lib/menus/GameFooter.svelte';
 
-	import { deletePlayerFromGame } from '$lib/functions/requests';
+	import { deleteGame, deletePlayerFromGame, getGame } from '$lib/functions/requests';
 	import Button from '$lib/Button.svelte';
 	import InputField from '$lib/InputField.svelte';
 
@@ -33,6 +32,14 @@
 		} else {
 			localStorage.setItem('base_server_path', production_url);
 		}
+		if (localStorage.getItem('game_name')) {
+			const response: Promise<Response> = getGame(localStorage.getItem('game_name'));
+			response.then((response) => {
+				if (!response.ok) {
+					setGameState('join');
+				}
+			}) 
+		}
 	});
 
 	let player_to_kick: string;
@@ -47,15 +54,8 @@
 				if (response.ok) {
 					setGameState('join');
 				} else {
-					setGameState('join');
 				}
 			});
-		}
-	}
-
-	function unsafe_leave() {
-		if (confirm('This could ruin the game for the other players. Do you still want to leave?')) {
-			setGameState('join');
 		}
 	}
 
@@ -71,19 +71,15 @@
 		}
 	}
 
-	function reset() {
-		setGameState('join');
+	function onEndGame() {
+		if (confirm('Do you want to end the game for everybody?')) {
+			const response: Promise<Response> = deleteGame(localStorage.getItem('game_name'));
+			setGameState('join');
+		}
 	}
 </script>
 
 <main>
-	<!-- {#if score_header_states.has(game_state)}
-		<ScoreHeader
-			name={localStorage.getItem('name')}
-			game_name={localStorage.getItem('game_name')}
-		/>
-	{/if} -->
-
 	{#if game_state == 'join'}
 		<Join {setGameState} />
 	{:else if game_state == 'answer'}
@@ -109,13 +105,21 @@
 			game_name={localStorage.getItem('game_name')}
 		/>
 	{/if}
-	{#if game_state != 'join'}
-		<div style="padding-top: 10em;">
+	<div style="padding: 50px;">
+
+	</div>
+	{#if game_state == 'answer'}
+		<div>
 			<Button text="Leave Game" onClick={onLeave} />
 		</div>
 		<div>
 			<InputField bind:value={player_to_kick} text="player to kick" />
 			<Button text="Kick" onClick={onKick} />
+		</div>
+	{/if}
+	{#if game_state != 'join'}
+		<div>
+			<Button text="End Game" onClick={onEndGame} />
 		</div>
 	{/if}
 </main>

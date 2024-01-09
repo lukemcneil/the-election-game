@@ -57,6 +57,14 @@ export async function deletePlayerFromGame(game_name: string | null, name: strin
 	return response;
 }
 
+export async function deleteGame(game_name: string | null) {
+	const response: Response = await fetch(getBaseServerPath() + game_name, {
+		method: 'DELETE',
+		headers: { 'Content-Type': 'application/json' },
+	});
+	return response;
+}
+
 export async function postGuess(game_name: string | null, guess: Guess) {
 	const response: Response = await fetch(getBaseServerPath() + game_name + '/guess', {
 		method: 'POST',

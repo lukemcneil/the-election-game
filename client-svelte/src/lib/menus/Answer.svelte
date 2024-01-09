@@ -54,6 +54,7 @@
 
 	function onChangeQuestion() {
 		const response: Promise<Response> = postChangeQuestion(game_name);
+		readGame();
 	}
 </script>
 
