@@ -1,4 +1,4 @@
-<script lang="ts">
+<script src="DragDropTouch.js" lang="ts">
 	import { flip } from 'svelte/animate';
 
 	export let baskets: Array<{ name: string; item: string }> = [];
