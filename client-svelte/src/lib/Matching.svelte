@@ -39,6 +39,15 @@
 				baskets[data.basketIndex].item = '';
 				baskets[drop_basket_id].item = data.itemName;
 			}
+		} else {
+			if (data.basketIndex == -1) {
+				players.splice(players.indexOf(data.itemName), 1);
+				players = [...players, baskets[drop_basket_id].item];
+				baskets[drop_basket_id].item = data.itemName;
+			} else {
+				baskets[data.itemIndex].item = baskets[drop_basket_id].item;
+				baskets[drop_basket_id].item = data.itemName;
+			}
 		}
 
 		hoveringOverBasket = null;
