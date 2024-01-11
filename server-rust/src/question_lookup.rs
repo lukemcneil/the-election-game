@@ -8,6 +8,7 @@ use std::{
     io::{self, BufRead, BufReader},
     path::Path,
 };
+use std::env;
 
 const DEFAULT_QUESTION: &str = "Answer the question you would have liked to be asked?";
 
@@ -80,7 +81,7 @@ impl QuestionLookup {
 }
 
 fn send_gpt_request(prompt: &str) -> Result<serde_json::Value, reqwest::Error> {
-    let api_key = "";
+    let api_key = env::var("CHAT_GPT_TOKEN").unwrap();
     let gpt_endpoint = "https://api.openai.com/v1/chat/completions"; 
 
     let content = format!("Make up a question for the game loaded questions about the theme: {prompt}");
