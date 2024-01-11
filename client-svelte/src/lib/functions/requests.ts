@@ -89,3 +89,14 @@ export async function postChangeQuestion(game_name: string | null) {
 	});
 	return response;
 }
+
+export async function postChatGptQuestion(game_name: string | null, prompt: string) {
+	const response: Response = await fetch(getBaseServerPath() + game_name + '/chat_gpt_question', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			'prompt': prompt
+		})
+	});
+	return response;
+}

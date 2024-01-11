@@ -1,5 +1,4 @@
 use rand::seq::SliceRandom;
-use rocket::response;
 use rocket_contrib::json;
 use reqwest;
 use serde::Deserialize;

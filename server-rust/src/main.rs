@@ -188,6 +188,7 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
                 delete_game,
                 get_score,
                 change_question,
+                chat_gpt_question,
             ],
         )
         .manage(Mutex::new(questions))

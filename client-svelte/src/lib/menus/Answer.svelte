@@ -3,7 +3,7 @@
 	import InputField from '$lib/InputField.svelte';
 	import { Player } from '$lib/datatypes/player';
 	import { onMount } from 'svelte';
-	import { getGame, postAnswer, postChangeQuestion } from '$lib/functions/requests';
+	import { getGame, postAnswer, postChangeQuestion, postChatGptQuestion } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
 
 	export let setGameState: (new_state: string) => void;
@@ -15,6 +15,7 @@
 	let round_count: number;
 
 	let answer: string = '';
+	let prompt: string = '';
 
 	function onSubmitClick() {
 		if (answer == '') {
@@ -56,6 +57,14 @@
 		const response: Promise<Response> = postChangeQuestion(game_name);
 		readGame();
 	}
+
+	function onMrGptQuestion() {
+		if (prompt == '') {
+			return;
+		}
+		const response: Promise<Response> = postChatGptQuestion(game_name, prompt);
+		readGame();
+	}
 </script>
 
 <main>
@@ -81,6 +90,12 @@
 			{player}
 		</div>
 	{/each}
+	<div>
+		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
+	</div>
+	<div>
+		<Button text="Get Mr. GPT question" onClick={onMrGptQuestion} />
+	</div>
 </main>
 
 <style>
