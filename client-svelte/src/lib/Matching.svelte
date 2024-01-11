@@ -45,7 +45,7 @@
 				players = [...players, baskets[drop_basket_id].item];
 				baskets[drop_basket_id].item = data.itemName;
 			} else {
-				baskets[data.itemIndex].item = baskets[drop_basket_id].item;
+				baskets[data.basketIndex].item = baskets[drop_basket_id].item;
 				baskets[drop_basket_id].item = data.itemName;
 			}
 		}
