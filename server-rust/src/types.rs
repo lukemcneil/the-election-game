@@ -272,7 +272,10 @@ impl Game {
     }
 
     pub fn change_question(&mut self, new_question: String) -> () {
-        self.rounds.last_mut().unwrap().change_question(new_question);
+        self.rounds
+            .last_mut()
+            .unwrap()
+            .change_question(new_question);
     }
 }
 

@@ -107,7 +107,11 @@ fn get_score(game_id: String, games: State<Games>) -> Result<Json<HashMap<Player
 }
 
 #[post("/game/<game_id>/change_question")]
-fn change_question(game_id: String, games: State<Games>, questions: State<Questions>) -> Result<()> {
+fn change_question(
+    game_id: String,
+    games: State<Games>,
+    questions: State<Questions>,
+) -> Result<()> {
     let mut games = games.lock();
     let game = games.get(&game_id)?;
     game.change_question(questions.lock().get());
@@ -141,10 +145,16 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     let cors = CorsOptions::default()
         .allowed_origins(AllowedOrigins::all())
         .allowed_methods(
-            vec![Method::Get, Method::Post, Method::Patch, Method::Put, Method::Delete]
-                .into_iter()
-                .map(From::from)
-                .collect(),
+            vec![
+                Method::Get,
+                Method::Post,
+                Method::Patch,
+                Method::Put,
+                Method::Delete,
+            ]
+            .into_iter()
+            .map(From::from)
+            .collect(),
         )
         .allow_credentials(true);
 

@@ -1,7 +1,12 @@
 use std::collections::HashMap;
 
-use crate::{rocket, types::PlayerData, Answer, Game, Guess};
+use crate::{rocket, types::PlayerData, Answer, Game, Guess, question_lookup::QuestionLookup};
 use rocket::{http::Status, local::Client};
+
+#[test]
+fn test_gpt() {
+    println!("{}", QuestionLookup::default().get_gpt_question("computer"))
+}
 
 #[test]
 fn not_found() {

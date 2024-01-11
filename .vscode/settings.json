@@ -1,6 +1,3 @@
 {
-    "cSpell.words": [
-        "Hasher",
-        "structopt"
-    ]
+  "cSpell.words": ["Hasher", "reqwest", "structopt"]
 }
