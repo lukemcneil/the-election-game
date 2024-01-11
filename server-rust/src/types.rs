@@ -1,6 +1,7 @@
 mod traits;
 
 use serde::{Deserialize, Serialize};
+use core::str;
 #[cfg(test)]
 use std::iter::FromIterator;
 use std::{
@@ -11,6 +12,7 @@ use std::{
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 pub(crate) type Player = String;
 pub(crate) type GameId = String;
+pub(crate) type Prompt = String;
 
 #[derive(Serialize, Debug)]
 pub(crate) enum Error {
@@ -56,6 +58,20 @@ impl BadRequest {
         Self {
             error: format!("{:?}", error),
             message: format!("{}", error),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct PromptData {
+    pub(crate) prompt: Prompt,
+}
+
+#[cfg(test)]
+impl PromptData {
+    pub(crate) fn new(prompt: &str) -> Self {
+        Self {
+            prompt: Prompt::from(prompt),
         }
     }
 }

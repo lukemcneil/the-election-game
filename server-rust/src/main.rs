@@ -18,7 +18,7 @@ use rocket_cors::{AllowedOrigins, CorsOptions};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use types::{Answer, Game, Guess, Player, PlayerData, Result};
+use types::{Answer, Game, Guess, Player, PlayerData, Result, PromptData};
 
 type Games = Mutex<types::Games>;
 type Questions = Mutex<QuestionLookup>;
@@ -115,6 +115,19 @@ fn change_question(
     let mut games = games.lock();
     let game = games.get(&game_id)?;
     game.change_question(questions.lock().get());
+    Ok(())
+}
+
+#[post("/game/<game_id>/chat_gpt_question", data = "<prompt>")]
+fn chat_gpt_question(
+    game_id: String,
+    prompt: Json<PromptData>,
+    games: State<Games>,
+    questions: State<Questions>,
+) -> Result<()> {
+    let mut games = games.lock();
+    let game = games.get(&game_id)?;
+    game.change_question(questions.lock().get_gpt_question(&prompt.into_inner().prompt));
     Ok(())
 }
 
