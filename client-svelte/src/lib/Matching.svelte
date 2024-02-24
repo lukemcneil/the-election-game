@@ -69,7 +69,7 @@
 {#each baskets as basket, basketIndex (basket)}
 	<div animate:flip>
 		<!-- <b>{basket.name}</b> -->
-		<img src="http://127.0.0.1:8172/{geturl(basket.name)}" alt="Shut up"/>
+		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
 		<ul
 			class:hovering={hoveringOverBasket === basket.name}
 			on:dragenter={() => (hoveringOverBasket = basket.name)}
