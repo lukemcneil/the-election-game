@@ -1,8 +1,11 @@
 <script src="DragDropTouch.js" lang="ts">
 	import { flip } from 'svelte/animate';
+	import { Picture } from '$lib/datatypes/picture';
+
 
 	export let baskets: Array<{ name: string; item: string }> = [];
 	export let players: Array<string> = [];
+	export let pictures: Array<Picture> = []
 
 	let hoveringOverBasket: string | null;
 
@@ -52,11 +55,21 @@
 
 		hoveringOverBasket = null;
 	}
+
+	function geturl(prompt : string){
+		for (let i = 0; i < pictures.length; i++){
+			console.log(pictures[i].prompt + " " + prompt);
+			if (prompt == pictures[i].prompt){
+				return pictures[i].url;
+			}
+		} 
+	}
 </script>
 
 {#each baskets as basket, basketIndex (basket)}
 	<div animate:flip>
-		<b>{basket.name}</b>
+		<!-- <b>{basket.name}</b> -->
+		<img src="http://127.0.0.1:8172/{geturl(basket.name)}" alt="Shut up"/>
 		<ul
 			class:hovering={hoveringOverBasket === basket.name}
 			on:dragenter={() => (hoveringOverBasket = basket.name)}

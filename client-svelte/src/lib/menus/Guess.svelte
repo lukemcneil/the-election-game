@@ -6,6 +6,7 @@
 	import { Guess } from '$lib/datatypes/guess';
 	import { getGame, postGuess } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
+	import { Picture } from '$lib/datatypes/picture';
 	import Matching from '$lib/Matching.svelte';
 
 	export let setGameState: (new_state: string) => void;
@@ -14,6 +15,7 @@
 
 	let question: string;
 	let players: Array<string> = [];
+	let pictures: Array<Picture> = [];
 	// let other_players: Array<string> = [];
 	let answers: Array<Answer> = [];
 	let rounds: Array<Round> = [];
@@ -30,6 +32,7 @@
 					players = data.players;
 				}
 				answers = data.rounds[data.rounds.length - 1].answers;
+				pictures = data.rounds[data.rounds.length - 1].pictures;
 
 				if (baskets.length == 0) {
 					answers.forEach((answer) => {
@@ -75,9 +78,15 @@
 <main>
 	<h2>Guess who said what</h2>
 	<div>{question}</div>
-	<Matching {baskets} players={players.filter((e) => e !== name)} />
+	<Matching {baskets} players={players.filter((e) => e !== name)} pictures={pictures} />
 	<div>
 		<Button text="Submit" onClick={onSubmit} />
+	</div>
+	<div>
+		<!-- {#each pictures as pic }
+			<div>{pic.player}</div>
+			<img src="http://127.0.0.1:8172/{pic.url}" alt="Shut up"/>
+		{/each} -->
 	</div>
 </main>
 

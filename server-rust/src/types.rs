@@ -126,14 +126,14 @@ impl Answer {
 }
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub(crate) struct Picture {
-    pub player: Player,
+    pub prompt : String,
     pub url: String,
 }
 
 impl Picture {
-    pub(crate) fn new(player: &str, input_url: &str) -> Self {
+    pub(crate) fn new(prompt: &str, input_url: &str) -> Self {
         Self {
-            player: Player::from(player),
+            prompt: String::from(prompt),
             url: String::from(input_url),
         }
     }
@@ -293,10 +293,9 @@ impl Game {
             }
             Err(_err) => {}
         }
-        let player_name = player;
         let input_url = &format!("pictures/{}{}.png", game_id, player);
         let new_picture = Picture {
-            player: player_name.to_string(),
+            prompt: prompt.to_string(),
             url: input_url.to_string(),
         };
         // let new_answer = Answer::new("ayden", data_file)
