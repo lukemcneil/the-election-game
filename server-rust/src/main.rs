@@ -67,7 +67,7 @@ fn answer(game_id: String, answer: Json<Answer>, games: State<Games>) -> Result<
     let mut games = games.lock();
     let game = games.get(&game_id)?;
     let answer = answer.into_inner();
-    game.answer(answer)
+    game.answer(answer, game_id)
 }
 
 #[post("/game/<game_id>/guess", data = "<guess>")]
@@ -174,7 +174,8 @@ fn rocket(opt: Option<Opt>) -> rocket::Rocket {
     rocket::ignite().attach(cors.to_cors().unwrap());
     rocket
         .attach(cors.to_cors().unwrap())
-        .mount("/", StaticFiles::from("../client-svelte/build/index.html"))
+        // .mount("/", StaticFiles::from("../client-svelte/build/index.html"))
+        .mount("/pictures", StaticFiles::from("images").rank(11))
         .mount(
             "/api/v1",
             routes![
