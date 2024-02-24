@@ -22,6 +22,12 @@ pub(crate) type GameId = String;
 pub(crate) type Prompt = String;
 
 
+#[derive(Serialize, Debug, Clone)]
+pub(crate) enum GameMode {
+    Text, 
+    Pictures,
+}
+
 #[derive(Serialize, Debug)]
 pub(crate) enum Error {
     GameConflict,
@@ -208,6 +214,7 @@ impl Round {
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub(crate) struct Game {
+    pub(crate) game_mode: GameMode,
     /// The list of players in the game
     pub(crate) players: HashSet<String>,
     /// The list of rounds in the game with the most recent round being the last item in the list

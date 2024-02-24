@@ -6,6 +6,7 @@
 	export let setGameState: (new_state: string) => void;
 	let name: string;
 	let game_name: string;
+	let game_mode: string = "Text";
 
 	let error_message: string = '';
 	let no_name_error_message = 'no name';
@@ -73,6 +74,20 @@
 	<div>
 		<Button text="Create Game" onClick={onClickCreateGame} />
 	</div>
+
+	<h3>Game Mode</h3>
+		<div>
+		<label>
+			<input type="radio" bind:group={game_mode} value={'Text'} />
+			Text	
+		</label>
+
+		<label>
+			<input type="radio" bind:group={game_mode} value={'Picture'} />
+			Pictures	
+		</label>
+		</div>
+	<div>
 
 	<div>
 		{error_message}
