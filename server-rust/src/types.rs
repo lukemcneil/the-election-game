@@ -215,7 +215,7 @@ pub(crate) struct Game {
 }
 
 fn send_stable_diffusion_request(prompt: &str) -> std::result::Result<serde_json::Value, reqwest::Error> {
-    let stable_diffusion_endpoint = "http://127.0.0.1:7860/sdapi/v1/txt2img"; 
+    let stable_diffusion_endpoint = "https://a627-2600-1700-5b80-980-54ec-6d29-2cd7-fa0b.ngrok-free.app/sdapi/v1/txt2img"; 
 
     // Prepare the request payload
     let payload = json!({
