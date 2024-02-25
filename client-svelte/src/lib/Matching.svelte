@@ -68,8 +68,11 @@
 
 {#each baskets as basket, basketIndex (basket)}
 	<div animate:flip>
-		<!-- <b>{basket.name}</b> -->
+		{#if localStorage.getItem("game_mode") == "text"}
+		<b>{basket.name}</b>
+		{:else}
 		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
+		{/if}
 		<ul
 			class:hovering={hoveringOverBasket === basket.name}
 			on:dragenter={() => (hoveringOverBasket = basket.name)}

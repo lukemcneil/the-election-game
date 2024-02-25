@@ -214,7 +214,6 @@ impl Round {
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub(crate) struct Game {
-    pub(crate) game_mode: GameMode,
     /// The list of players in the game
     pub(crate) players: HashSet<String>,
     /// The list of rounds in the game with the most recent round being the last item in the list

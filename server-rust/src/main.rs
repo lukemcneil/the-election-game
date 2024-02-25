@@ -34,11 +34,10 @@ fn heartbeat() -> &'static str {
     "heartbeat"
 }
 
-#[put("/game/<game_id>", data = "<player, game_mode>")]
+#[put("/game/<game_id>", data = "<player>")]
 fn create_game(
     game_id: String,
     player: Json<PlayerData>,
-    game_mode: Json<GameMode>,
     games: State<Games>,
     questions: State<Questions>,
 ) -> Result<()> {
