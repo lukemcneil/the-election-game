@@ -72,6 +72,7 @@
 				setGameState('guess_wait');
 			}
 		});
+		localStorage.setItem("get_increment", "true");
 	}
 </script>
 

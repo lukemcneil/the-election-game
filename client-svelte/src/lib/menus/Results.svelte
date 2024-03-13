@@ -28,6 +28,7 @@ let question: string;
 let answers: Array < Answer > = [];
 
 let pictures: Array < Picture > = [];
+let players: Array<string> = [];
 let correct_answer_map: Map < string, string > = new Map();
 let my_answer: string;
 let my_guess: Array < Answer > = [];
@@ -36,6 +37,7 @@ let score_map: Map < string, number > = new Map();
 let people_who_guessed_you_correct: Set<string> = new Set([]);
 
 function onNextRoundClick() {
+    localStorage.setItem("get_increment", "true");
     setGameState('answer');
 }
 
@@ -54,6 +56,7 @@ async function readGame() {
     getGame(game_name)
         .then((response) => response.json())
         .then((data) => {
+            players = data.players;
             question = data.rounds[data.rounds.length - 2].question;
             answers = data.rounds[data.rounds.length - 2].answers;
             pictures = data.rounds[data.rounds.length - 2].pictures;
@@ -76,6 +79,17 @@ async function readGame() {
                 
             });
             people_who_guessed_you_correct = people_who_guessed_you_correct;
+            if (localStorage.getItem("get_increment") == "true") {
+                people_who_guessed_you_correct.forEach(player => {
+                    if (localStorage.getItem(player)) {
+                        localStorage.setItem(player, localStorage.getItem(player) + "x")
+                    } else {
+                        localStorage.setItem(player, "x")
+                    }
+                    
+                });
+                localStorage.setItem("get_increment", "false");
+            }
 
             my_guess.forEach((answer: Answer) => {
                 my_guess_map.set(answer.player, answer.answer);
@@ -133,6 +147,20 @@ onMount(() => {
     <div>
         {player}: {score}
     </div>
+    {/each}
+    <h2>
+        Who knows you the Best?
+    </h2>
+    {#each players as player}
+    {#if localStorage.getItem(player)}
+        <div>
+            {player}: {localStorage.getItem(player)?.length}
+        </div>
+    {:else if player != name}
+        <div>
+            {player}: 0
+        </div>
+    {/if}
     {/each}
     <div>
         <Button text="Next Round" onClick={onNextRoundClick} />
