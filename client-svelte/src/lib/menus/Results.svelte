@@ -26,12 +26,14 @@ export let game_name: string | null;
 
 let question: string;
 let answers: Array < Answer > = [];
+
 let pictures: Array < Picture > = [];
 let correct_answer_map: Map < string, string > = new Map();
 let my_answer: string;
 let my_guess: Array < Answer > = [];
 let my_guess_map: Map < string, string > = new Map();
 let score_map: Map < string, number > = new Map();
+let people_who_guessed_you_correct: Set<string> = new Set([]);
 
 function onNextRoundClick() {
     setGameState('answer');
@@ -45,7 +47,6 @@ function getScores() {
                 score_map.set(prop, data[prop]);
             }
             score_map = new Map([...score_map.entries()].sort((a, b) => b[1] - a[1]));
-            console.log(score_map)
         });
 }
 
@@ -65,8 +66,16 @@ async function readGame() {
             data.rounds[data.rounds.length - 2].guesses.forEach((guess: Guess) => {
                 if (guess.player == name) {
                     my_guess = guess.answers;
+                } else {
+                    guess.answers.forEach(answer => {
+                        if (answer.player == name && answer.answer == my_answer) {
+                            people_who_guessed_you_correct.add(guess.player);
+                        }
+                    });
                 }
+                
             });
+            people_who_guessed_you_correct = people_who_guessed_you_correct;
 
             my_guess.forEach((answer: Answer) => {
                 my_guess_map.set(answer.player, answer.answer);
@@ -91,17 +100,35 @@ onMount(() => {
     <div>
         {#each answers as answer}
         {#if answer.player != name}
-        <div>
-            {answer.player}: {my_guess_map.get(answer.player)}
             {#if answer.answer == my_guess_map.get(answer.player)}
-            ✅
+            <div class="correct">
+                <div class="bold">
+                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
+                {answer.player}
+                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
+                </div>
+                {my_guess_map.get(answer.player)}
+            </div>
             {:else}
-            ❌ actually said: {answer.answer}
+            <div class="incorrect">
+                <div class="bold">
+                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
+                {answer.player} 
+                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
+                </div>
+                    {answer.answer}
+                <div>
+                    You guessed:
+                </div>
+                {my_guess_map.get(answer.player)}
+            </div>
             {/if}
-        </div>
         {/if}
         {/each}
     </div>
+    <h2>
+        Score
+    </h2>
     {#each score_map as [player, score]}
     <div>
         {player}: {score}
@@ -110,7 +137,7 @@ onMount(() => {
     <div>
         <Button text="Next Round" onClick={onNextRoundClick} />
     </div>
-    <div>
+    <!-- <div>
         {#each pictures as picture}
         <div>{picture.prompt}</div>
         <div>
@@ -118,9 +145,18 @@ onMount(() => {
 
         </div>
         {/each}
-    </div>
+    </div> -->
 </main>
 
 <style>
 @import '../../app.css';
+.correct{
+    border:1px solid lightgreen; 
+}
+.incorrect{
+    border:1px solid red; 
+}
+.bold{
+    font-weight: bold;
+}
 </style>

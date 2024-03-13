@@ -71,9 +71,9 @@
 	<h2>
 		Round: {round_count}
 	</h2>
-	<div>
-		<Button text="Change Question" onClick={onChangeQuestion} />
-	</div>
+	<h3>
+		{game_name}
+	</h3>
 	<div>
 		{current_question}
 	</div>
@@ -84,17 +84,21 @@
 		<Button text="Submit" onClick={onSubmitClick} />
 	</div>
 
-	<div>Players:</div>
+	<h3>Players</h3>
 	{#each players as player}
 		<div>
 			{player}
 		</div>
 	{/each}
+	<h3>Change Question</h3>
+	<div>
+		<Button text="New Question" onClick={onChangeQuestion} />
+	</div>
 	<div>
 		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
 	</div>
 	<div>
-		<Button text="Get Mr. GPT question" onClick={onMrGptQuestion} />
+		<Button text="Get New Mr. GPT Question" onClick={onMrGptQuestion} />
 	</div>
 </main>
 
