@@ -109,7 +109,10 @@ onMount(() => {
         {question}
     </div>
     <div>
-        You said: {my_answer}
+        You said:
+    </div>
+    <div>
+        {my_answer}
     </div>
     <div>
         {#each answers as answer}
@@ -117,18 +120,14 @@ onMount(() => {
             {#if answer.answer == my_guess_map.get(answer.player)}
             <div class="correct">
                 <div class="bold">
-                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
                 {answer.player}
-                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
                 </div>
                 {my_guess_map.get(answer.player)}
             </div>
             {:else}
             <div class="incorrect">
                 <div class="bold">
-                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
                 {answer.player} 
-                {#if people_who_guessed_you_correct.has(answer.player)}⭐️{/if}
                 </div>
                     {answer.answer}
                 <div>
@@ -154,7 +153,9 @@ onMount(() => {
     {#each players as player}
     {#if localStorage.getItem(player)}
         <div>
+            {#if people_who_guessed_you_correct.has(player)}⭐️{/if}
             {player}: {localStorage.getItem(player)?.length}
+            {#if people_who_guessed_you_correct.has(player)}⭐️{/if}
         </div>
     {:else if player != name}
         <div>
