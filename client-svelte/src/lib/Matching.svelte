@@ -33,58 +33,62 @@
 		// getGameLoop();
 	});
 
+	function isSameBasket(basket_id: number) {
+		if (selected_name == null) {
+			return false;
+		} else if (basket_id == -1) {
+			return selected_name in players;
+		} else {
+			if (baskets[basket_id].item == selected_name) {
+				return true;
+			}
+		}
+	}
+
 	function onClickBasket(event: any, basket_id: number) {
 		console.log("Basket")
+		if (selected_name == null) {
+			return;
+		} else if (isSameBasket(basket_id)) {
+			return;
+		} else if (basket_id == -1) {
+			baskets[selected_basket_id].item = "";
+			players.push(selected_name);
+			players = [...players];
+			selected_name = null
+			selected_basket_id = null
+		} else if (selected_basket_id == -1) {
+			if (baskets[basket_id].item != "") {
+				players.push(baskets[basket_id].item);
+			}
+			baskets[basket_id].item = selected_name;
+			players.splice(players.indexOf(selected_name), 1);
+			selected_name = null
+			selected_basket_id = null
+		} else {
+			let copy = selected_name;
+			baskets[selected_basket_id].item = baskets[basket_id].item; 
+			baskets[basket_id].item = copy; 
+			selected_name = null
+			selected_basket_id = null
+		}
 		if (selected_name == baskets[basket_id].item) {
 			return;
-		}
-		if (selected_name != null) {
-			// console.log(basket_id)
-			if (basket_id == -1) {
-				baskets[selected_basket_id].item = "";
-				players.push(selected_name);
-				players = [...players];
-				selected_name = null
-				selected_basket_id = null
-			} else if (selected_basket_id == -1) {
-				baskets[basket_id].item = selected_name;
-				players.splice(players.indexOf(selected_name), 1);
-				players = [...players];
-				selected_name = null
-				selected_basket_id = null
-			} else {
-
-			}
 		}
 	}
 
 	function onClickCard(event: any, name: string, basket_id: number) {
 		console.log("Card")
 		if (selected_name == null) {
-			// console.log("here")
 			selected_name = name;
 			selected_basket_id = basket_id;
-		} else {
-			if (selected_basket_id == -1) {
-				players.splice(players.indexOf(selected_name), 1);
-				players.push(name);
-				players = [...players];
-				baskets[basket_id].item = name;
-				selected_name = null
-				selected_basket_id = null
-			} else if (basket_id == -1) {
-				baskets[basket_id].item = "";
-				players.push(name);
-				players = [...players];
-				selected_name = null
-				selected_basket_id = null
-			} else {
-				let copy = selected_name;
-				baskets[selected_basket_id].item = name; 
-				baskets[basket_id].item = copy; 
-				selected_name = null
-				selected_basket_id = null
-			}
+		} else if (basket_id == -1) {
+			// we cannot do this because we can tell when we click on a card from the basket function
+			// baskets[selected_basket_id].item = name;
+			// players.push(selected_name)
+			// players = [...players];
+			// selected_name = null
+			// selected_basket_id = null
 		}
 	}
 </script>
