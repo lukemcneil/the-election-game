@@ -1,60 +1,16 @@
 <script src="DragDropTouch.js" lang="ts">
 	import { flip } from 'svelte/animate';
 	import { Picture } from '$lib/datatypes/picture';
+	import { onMount } from 'svelte';
+	import { sleep } from './functions/helper';
 
 
 	export let baskets: Array<{ name: string; item: string }> = [];
 	export let players: Array<string> = [];
 	export let pictures: Array<Picture> = []
 
-	let hoveringOverBasket: string | null;
-
-	function dragStart(event, basketIndex: number, item: string | number) {
-		let data;
-		let itemName;
-		if (basketIndex == -1) {
-			itemName = players[item];
-			data = { basketIndex, itemName };
-		} else {
-			itemName = item;
-			data = { basketIndex, itemName };
-		}
-		event.dataTransfer.setData('text/plain', JSON.stringify(data));
-	}
-
-	function drop(event, drop_basket_id: number) {
-		event.preventDefault();
-		const json = event.dataTransfer.getData('text/plain');
-		const data = JSON.parse(json);
-
-		if (drop_basket_id == -1) {
-			if (data.basketIndex != -1) {
-				players = [...players, data.itemName];
-				baskets[data.basketIndex].item = '';
-			}
-		} else if (baskets[drop_basket_id].item == '') {
-			if (data.basketIndex == -1) {
-				players.splice(players.indexOf(data.itemName), 1);
-				players = [...players];
-				baskets[drop_basket_id].item = data.itemName;
-			} else {
-				console.log(baskets[drop_basket_id].item);
-				baskets[data.basketIndex].item = '';
-				baskets[drop_basket_id].item = data.itemName;
-			}
-		} else {
-			if (data.basketIndex == -1) {
-				players.splice(players.indexOf(data.itemName), 1);
-				players = [...players, baskets[drop_basket_id].item];
-				baskets[drop_basket_id].item = data.itemName;
-			} else {
-				baskets[data.basketIndex].item = baskets[drop_basket_id].item;
-				baskets[drop_basket_id].item = data.itemName;
-			}
-		}
-
-		hoveringOverBasket = null;
-	}
+	let selected_name: string | null;
+	let selected_basket_id: number | null;
 
 	function geturl(prompt : string){
 		for (let i = 0; i < pictures.length; i++){
@@ -63,6 +19,73 @@
 				return pictures[i].url;
 			}
 		} 
+	}
+
+	let get_game_interval_ms: number = 1000;
+	async function getGameLoop() {
+		console.log(selected_name);
+		console.log(selected_basket_id);
+		await sleep(get_game_interval_ms);
+		getGameLoop();
+	}
+
+	onMount(() => {
+		// getGameLoop();
+	});
+
+	function onClickBasket(event: any, basket_id: number) {
+		console.log("Basket")
+		if (selected_name == baskets[basket_id].item) {
+			return;
+		}
+		if (selected_name != null) {
+			// console.log(basket_id)
+			if (basket_id == -1) {
+				baskets[selected_basket_id].item = "";
+				players.push(selected_name);
+				players = [...players];
+				selected_name = null
+				selected_basket_id = null
+			} else if (selected_basket_id == -1) {
+				baskets[basket_id].item = selected_name;
+				players.splice(players.indexOf(selected_name), 1);
+				players = [...players];
+				selected_name = null
+				selected_basket_id = null
+			} else {
+
+			}
+		}
+	}
+
+	function onClickCard(event: any, name: string, basket_id: number) {
+		console.log("Card")
+		if (selected_name == null) {
+			// console.log("here")
+			selected_name = name;
+			selected_basket_id = basket_id;
+		} else {
+			if (selected_basket_id == -1) {
+				players.splice(players.indexOf(selected_name), 1);
+				players.push(name);
+				players = [...players];
+				baskets[basket_id].item = name;
+				selected_name = null
+				selected_basket_id = null
+			} else if (basket_id == -1) {
+				baskets[basket_id].item = "";
+				players.push(name);
+				players = [...players];
+				selected_name = null
+				selected_basket_id = null
+			} else {
+				let copy = selected_name;
+				baskets[selected_basket_id].item = name; 
+				baskets[basket_id].item = copy; 
+				selected_name = null
+				selected_basket_id = null
+			}
+		}
 	}
 </script>
 
@@ -73,36 +96,36 @@
 		{:else}
 		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
 		{/if}
-		<ul
-			class:hovering={hoveringOverBasket === basket.name}
-			on:dragenter={() => (hoveringOverBasket = basket.name)}
-			on:dragleave={() => (hoveringOverBasket = null)}
-			on:drop={(event) => drop(event, basketIndex)}
-			ondragover="return false"
-		>
+		<ul on:click={(event) => onClickBasket(event, basketIndex)} >
 			{#if basket.item != ''}
 				<div class="item">
-					<li draggable={true} on:dragstart={(event) => dragStart(event, basketIndex, basket.item)}>
+					{#if selected_name == basket.item}
+					<li id="highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
 						{basket.item}
 					</li>
+					{:else}
+					<li on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
+						{basket.item}
+					</li>
+					{/if}
 				</div>
 			{/if}
 		</ul>
 	</div>
 {/each}
 <div>Players</div>
-<ul
-	class:hovering={hoveringOverBasket === 'bank'}
-	on:dragenter={() => (hoveringOverBasket = 'bank')}
-	on:dragleave={() => (hoveringOverBasket = null)}
-	on:drop={(event) => drop(event, -1)}
-	ondragover="return false"
->
+<ul on:click={(event) => onClickBasket(event, -1)}>
 	{#each players as item, itemIndex (item)}
 		<div class="item" animate:flip>
-			<li draggable={true} on:dragstart={(event) => dragStart(event, -1, itemIndex)}>
+			{#if selected_name == item}
+			<li id="highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 				{item}
 			</li>
+			{:else}
+			<li draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				{item}
+			</li>
+			{/if}
 		</div>
 	{/each}
 </ul>
@@ -112,6 +135,10 @@
   div {
     text-align: center;
   }
+  	#highlight {
+		background: cornflowerblue;
+		color: white;
+	}
 	.hovering {
 		border-color: cornflowerblue;
 	}
