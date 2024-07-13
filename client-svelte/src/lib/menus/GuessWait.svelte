@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { getGame } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
+	import PlayerList from '$lib/PlayerList.svelte';
 
 	export let setGameState: (new_state: string) => void;
 	export let game_name: string | null;
@@ -48,14 +49,9 @@
 </script>
 
 <main>
-	<h2>Guess who said what</h2>
-    <h3>Waiting for other players...</h3>
-	{#each waiting_for as player}
-		<div>
-			{player}
-		</div>
-	{/each}
+	<PlayerList players={players} waiting_for={waiting_for}/>
 	<div>{question}</div>
+	<div class="loader"></div>
 </main>
 
 <style>

@@ -94,13 +94,13 @@
 </script>
 
 {#each baskets as basket, basketIndex (basket)}
-	<div animate:flip>
+	<div>
 		{#if localStorage.getItem("game_mode") == "text"}
 		<b>{basket.name}</b>
 		{:else}
 		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
 		{/if}
-		<ul on:click={(event) => onClickBasket(event, basketIndex)} >
+		<ul class="flex-container not-bank" on:click={(event) => onClickBasket(event, basketIndex)} >
 			{#if basket.item != ''}
 				<div class="item">
 					{#if selected_name == basket.item}
@@ -117,12 +117,14 @@
 		</ul>
 	</div>
 {/each}
-<div>Players</div>
-<ul on:click={(event) => onClickBasket(event, -1)}>
+<div>
+<b>{"PLayers"}</b>
+</div>
+<ul class="flex-container" on:click={(event) => onClickBasket(event, -1)}>
 	{#each players as item, itemIndex (item)}
-		<div class="item" animate:flip>
+		<div class="item">
 			{#if selected_name == item}
-			<li id="highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+			<li class="" id="highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 				{item}
 			</li>
 			{:else}
@@ -135,35 +137,29 @@
 </ul>
 
 <style>
-	/* @import '../app.css'; */
-  div {
-    text-align: center;
-  }
+	@import '../app.css';
   	#highlight {
-		background: cornflowerblue;
-		color: white;
-	}
-	.hovering {
-		border-color: cornflowerblue;
-	}
-	.item {
-		display: inline; /* required for flip to work */
-	}
-	li {
-		background-color: lightgray;
-		cursor: pointer;
-		display: inline-block;
-		margin-right: 10px;
-		padding: 10px;
+		border-radius: 5px;
+		font-weight: bold;
 	}
 	li:hover {
-		background: cornflowerblue;
-		color: white;
+		font-weight: bold;
+		border-radius: 5px;
+	}
+	li {
+		display: inline;
+		text-align: left;
 	}
 	ul {
 		border: solid lightgray 1px;
-		display: flex; /* required for drag & drop to work when .item display is inline */
-		height: 40px; /* needed when empty */
 		padding: 10px;
+		list-style-type: none;
+		text-align: center;
+
 	}
+	.not-bank {
+		height: 52px;
+
+	}
+
 </style>

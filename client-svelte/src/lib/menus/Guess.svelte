@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Button.svelte';
+	import PlayerList from '$lib/PlayerList.svelte';
 	import type { Round } from '$lib/datatypes/round';
 	import { Answer } from '$lib/datatypes/answer';
 	import { onMount } from 'svelte';
@@ -14,6 +15,7 @@
 	export let game_name: string | null;
 
 	let question: string;
+	// let players: Array<string> = ["Adam", "Luke", "Ben", "Mother"];
 	let players: Array<string> = [];
 	let pictures: Array<Picture> = [];
 	// let other_players: Array<string> = [];
@@ -77,7 +79,7 @@
 </script>
 
 <main>
-	<h2>Guess who said what</h2>
+	<PlayerList players={players} waiting_for={[]}/>
 	<div>{question}</div>
 	<Matching {baskets} players={players.filter((e) => e !== name)} pictures={pictures} />
 	<div>

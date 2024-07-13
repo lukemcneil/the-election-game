@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { getGame, postAnswer } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
+	import PlayerList from '$lib/PlayerList.svelte';
 
 	export let setGameState: (new_state: string) => void;
 	export let game_name: string | null;
@@ -50,36 +51,14 @@
 		getGameLoop();
 	});
 
-	function answering(player: string) {
-		for (let i = 0; i < waiting_for.length; i++) {
-			if (waiting_for[i] == player) {
-				return true;
-			}
-		}
-		return false;
-	}
 </script>
 
 <main>
-	<h2>Players</h2>
-	<div class="flex-container">
-		{#each players as player}
-			{#if (answering(player))}
-				<div class="waiting item shadow">
-					{player}
-				</div>
-			{:else}
-				<div class="item shadow">
-					{player}
-				</div>
-			{/if}
-		{/each}
-	</div>
+	<PlayerList players={players} {waiting_for} />
 	<div>
 		{current_question}
 	</div>
 	<div class="loader"></div>
-
 </main>
 
 <style>
