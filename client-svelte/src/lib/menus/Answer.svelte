@@ -10,7 +10,7 @@
 	export let name: string | null;
 	export let game_name: string | null;
 
-	let players: Array<Player> = ["Adam", "Jason", "Snowboy", "Ethan", "Micah", "Luke", "Mother", "Dad"];
+	let players: Array<Player> = [];
 	let current_question: string | undefined = '';
 	let round_count: number;
 
