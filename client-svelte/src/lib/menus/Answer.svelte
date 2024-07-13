@@ -68,14 +68,12 @@
 </script>
 
 <main>
-	<h2>
-		Round: {round_count}
-	</h2>
-	<h3>
-		{game_name}
-	</h3>
+	<h1>
+		Weighty Inquiries
+	</h1>
 	<div>
 		{current_question}
+		<Button text="↻" onClick={onChangeQuestion} />
 	</div>
 	<div>
 		<InputField bind:value={answer} text="enter your answer" />
@@ -86,14 +84,11 @@
 
 	<h3>Players</h3>
 	{#each players as player}
-		<div>
+		<div class="player">
 			{player}
 		</div>
 	{/each}
 	<h3>Change Question</h3>
-	<div>
-		<Button text="New Question" onClick={onChangeQuestion} />
-	</div>
 	<div>
 		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
 	</div>
