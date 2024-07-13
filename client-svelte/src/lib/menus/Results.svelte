@@ -101,20 +101,18 @@ onMount(() => {
     readGame();
     getScores();
 });
+
+function didYouGuessRight(player: string) {
+    return my_guess_map.get(player) == correct_answer_map.get(player);
+}
+
+function on_click(player: string) {
+    alert("For " + player + " you guessed: " + my_guess_map.get(player));
+}
 </script>
 
 <main>
-    <h2>Results</h2>
-    <div>
-        {question}
-    </div>
-    <div>
-        You said:
-    </div>
-    <div>
-        {my_answer}
-    </div>
-    <div>
+    <!-- <div>
         {#each answers as answer}
         {#if answer.player != name}
             {#if answer.answer == my_guess_map.get(answer.player)}
@@ -138,27 +136,54 @@ onMount(() => {
             {/if}
         {/if}
         {/each}
+    </div> -->
+    <div>
+        {question}
     </div>
     <h2>
-        Score
+        Leader Board
     </h2>
     {#each score_map as [player, score]}
-    <div>
-        {player}: {score}
-    </div>
+        {#if player == name}
+            <div class="leader-board me">
+                {player}: {score}
+                <div>
+                    "{correct_answer_map.get(player)}"
+                </div>
+            </div>
+        {:else if didYouGuessRight(player)}
+            <div class="leader-board correct" on:click={() => on_click(player)} >
+                {player}: {score}
+                <div>
+                    "{correct_answer_map.get(player)}"
+                </div>
+            </div>
+        {:else}
+            <div class="leader-board incorrect" on:click={() => on_click(player)}>
+                {player}: {score}
+                <div>
+                    "{correct_answer_map.get(player)}"
+                </div>
+            </div>
+        {/if}
     {/each}
     <h2>
-        Who knows you the Best?
+        Who guessed you correct
     </h2>
     {#each players as player}
     {#if localStorage.getItem(player)}
-        <div>
-            {#if people_who_guessed_you_correct.has(player)}⭐️{/if}
+            {#if people_who_guessed_you_correct.has(player)}
+        <div class="leader-board correct">
             {player}: {localStorage.getItem(player)?.length}
-            {#if people_who_guessed_you_correct.has(player)}⭐️{/if}
         </div>
+            {:else}
+        <div class="leader-board incorrect">
+            {player}: {localStorage.getItem(player)?.length}
+        </div>
+            {/if}
+
     {:else if player != name}
-        <div>
+        <div class="leader-board">
             {player}: 0
         </div>
     {/if}
@@ -180,12 +205,28 @@ onMount(() => {
 <style>
 @import '../../app.css';
 .correct{
-    border:1px solid lightgreen; 
+    /* border:5px solid rgb(177, 253, 177);  */
+    background-color: #74b95f; 
 }
 .incorrect{
-    border:1px solid red; 
+    /* border:5px solid rgb(255, 128, 128);  */
+    background-color: #ca6060; 
+}
+.me{
+    background-color: #1cbcfc; 
 }
 .bold{
     font-weight: bold;
+}
+.leader-board {
+  padding: 10px; /* Padding around content */
+  margin: 5px; /* Margin between items */
+  font-family: inherit; /* Font family */
+  font-size: 16px; /* Font size */
+  text-align: center; /* Center text */
+  flex: 1; /* Equal width distribution among items */
+  border-radius: 5px;
+  flex: 0 0 calc(25% - 10px);
+
 }
 </style>

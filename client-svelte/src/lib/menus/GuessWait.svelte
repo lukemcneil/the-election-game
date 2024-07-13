@@ -50,7 +50,9 @@
 
 <main>
 	<PlayerList players={players} waiting_for={waiting_for}/>
-	<div>{question}</div>
+	<div style="padding-bottom: 100px;">
+		{question}
+	</div>
 	<div class="loader"></div>
 </main>
 

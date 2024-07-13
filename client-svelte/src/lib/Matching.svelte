@@ -151,11 +151,32 @@
 		text-align: left;
 	}
 	ul {
-		border: solid lightgray 1px;
+		color: inherit;
+		border: solid rgb(255, 255, 255) 1px;
 		padding: 10px;
 		list-style-type: none;
 		text-align: center;
 
+	}
+	@media (prefers-color-scheme: dark) {
+		ul {
+			color: inherit;
+			border: solid rgb(255, 255, 255) 1px;
+			padding: 10px;
+			list-style-type: none;
+			text-align: center;
+
+		}
+	}
+	@media (prefers-color-scheme: light) {
+		ul {
+			color: inherit;
+			border: solid rgb(0, 0, 0) 1px;
+			padding: 10px;
+			list-style-type: none;
+			text-align: center;
+
+		}
 	}
 	.not-bank {
 		height: 52px;

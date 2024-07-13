@@ -82,15 +82,15 @@
 	</div>
 	<div>
 		<InputField bind:value={answer} text="enter your answer" />
+		<Button text="↩" onClick={onSubmitClick} />
 	</div>
 	<div>
-		<Button text="Submit" onClick={onSubmitClick} />
 	</div>
 
-	<h3>Change Question</h3>
+	<div>Change Question</div>
 	<div>
 		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
-		<Button text=">" onClick={onMrGptQuestion} />
+		<Button text="↩" onClick={onMrGptQuestion} />
 	</div>
 </main>
 

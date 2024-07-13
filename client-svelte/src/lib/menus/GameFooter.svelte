@@ -43,7 +43,8 @@
 	</div>
 	<div>
 		<InputField bind:value={player_to_kick} text="player to kick" />
-		<Button text="Kick" onClick={onKick} />
+		<Button text="↩" onClick={onKick} />
+
 	</div>
 	<!-- <div>
 		<Button text="Reset" onClick={reset} />
