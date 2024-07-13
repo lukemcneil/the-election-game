@@ -21,7 +21,7 @@
 				players = data.players;
 				current_question = data.rounds[data.rounds.length - 1].question;
 				round_count = data.rounds.length;
-				console.log(data);
+				// console.log(data);
 				if (data.rounds[data.rounds.length - 1].answers.length == players.length) {
 					setGameState('guess');
 				} else {
@@ -31,7 +31,8 @@
 								(answer) => answer.player === player
 							)
 					);
-					console.log(waiting_for);
+					// console.log(waiting_for);
+					// console.log(players)
 				}
 			});
 	}
@@ -48,21 +49,37 @@
 	onMount(() => {
 		getGameLoop();
 	});
+
+	function answering(player: string) {
+		for (let i = 0; i < waiting_for.length; i++) {
+			if (waiting_for[i] == player) {
+				return true;
+			}
+		}
+		return false;
+	}
 </script>
 
 <main>
-	<h2>
-		Round: {round_count}
-	</h2>
-	<h3>Waiting on players...</h3>
-	{#each waiting_for as player}
-		<div>
-			{player}
-		</div>
-	{/each}
+	<h2>Players</h2>
+	<div class="flex-container">
+		{#each players as player}
+			{#if (answering(player))}
+				<div class="waiting item shadow">
+					{player}
+				</div>
+			{:else}
+				<div class="item shadow">
+					{player}
+				</div>
+			{/if}
+		{/each}
+	</div>
 	<div>
 		{current_question}
 	</div>
+	<div class="loader"></div>
+
 </main>
 
 <style>

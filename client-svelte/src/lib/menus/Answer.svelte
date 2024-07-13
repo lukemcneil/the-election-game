@@ -10,7 +10,7 @@
 	export let name: string | null;
 	export let game_name: string | null;
 
-	let players: Array<Player> = [];
+	let players: Array<Player> = ["Adam", "Jason", "Snowboy", "Ethan", "Micah", "Luke", "Mother", "Dad"];
 	let current_question: string | undefined = '';
 	let round_count: number;
 
@@ -68,9 +68,14 @@
 </script>
 
 <main>
-	<h1>
-		Weighty Inquiries
-	</h1>
+	<h2>Players</h2>
+	<div class="flex-container">
+		{#each players as player}
+			<div class="item shadow">
+				{player}
+			</div>
+		{/each}
+	</div>
 	<div>
 		{current_question}
 		<Button text="↻" onClick={onChangeQuestion} />
@@ -82,19 +87,13 @@
 		<Button text="Submit" onClick={onSubmitClick} />
 	</div>
 
-	<h3>Players</h3>
-	{#each players as player}
-		<div class="player">
-			{player}
-		</div>
-	{/each}
-	<h3>Change Question</h3>
+	<!-- <h3>Change Question</h3>
 	<div>
 		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
 	</div>
 	<div>
 		<Button text="Get New Mr. GPT Question" onClick={onMrGptQuestion} />
-	</div>
+	</div> -->
 </main>
 
 <style>

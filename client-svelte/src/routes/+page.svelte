@@ -80,6 +80,9 @@
 </script>
 
 <main>
+	<h1>
+		weighty inquiries
+	</h1>
 	{#if game_state == 'join'}
 		<Join {setGameState} />
 	{:else if game_state == 'answer'}
@@ -114,7 +117,7 @@
 		</div>
 		<div>
 			<InputField bind:value={player_to_kick} text="player to kick" />
-			<Button text="Kick" onClick={onKick} />
+			<Button text=">" onClick={onKick} />
 		</div>
 	{/if}
 	{#if game_state != 'join'}

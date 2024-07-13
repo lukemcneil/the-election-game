@@ -60,7 +60,6 @@
 </script>
 
 <main>
-	<h1>Weighty Inquiries</h1>
 	<div>
 		<InputField bind:value={name} text="enter your name" />
 	</div>
