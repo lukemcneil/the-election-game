@@ -54,6 +54,12 @@
 </script>
 
 <main>
+	<div class="topleft">
+		{game_name}
+	</div>
+	<div class="topright">
+		Round #{round_count}
+	</div>
 	<PlayerList players={players} {waiting_for} />
 	<div style="padding-bottom: 100px;">
 		{current_question}

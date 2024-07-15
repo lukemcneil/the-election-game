@@ -25,11 +25,13 @@
 	let guess: Guess = new Guess(name, []);
 	let baskets: Array<{ name: string; item: string }> = [];
 	let waiting_for: Array<string> = [];
+	let round_count: number;
 
 	async function readGame() {
 		getGame(game_name)
 			.then((response) => response.json())
 			.then((data) => {
+				round_count = data.rounds.length
 				question = data.rounds[data.rounds.length - 1].question;
 				if (players.length == 0) {
 					players = data.players;
@@ -87,6 +89,12 @@
 </script>
 
 <main>
+	<div class="topleft">
+		{game_name}
+	</div>
+	<div class="topright">
+		Round #{round_count}
+	</div>
 	<PlayerList {players} {waiting_for}/>
 	<div>{question}</div>
 	<Matching {baskets} players={players.filter((e) => e !== name)} pictures={pictures} />

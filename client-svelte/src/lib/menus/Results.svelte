@@ -35,6 +35,7 @@ let my_guess: Array < Answer > = [];
 let my_guess_map: Map < string, string > = new Map();
 let score_map: Map < string, number > = new Map();
 let people_who_guessed_you_correct: Set<string> = new Set([]);
+let round_count: number;
 
 function onNextRoundClick() {
     localStorage.setItem("get_increment", "true");
@@ -56,6 +57,7 @@ async function readGame() {
     getGame(game_name)
         .then((response) => response.json())
         .then((data) => {
+            round_count = data.rounds.length
             players = data.players;
             question = data.rounds[data.rounds.length - 2].question;
             answers = data.rounds[data.rounds.length - 2].answers;
@@ -112,6 +114,12 @@ function on_click(player: string) {
 </script>
 
 <main>
+	<div class="topleft">
+		{game_name}
+	</div>
+	<div class="topright">
+		Round #{round_count}
+	</div>
     <!-- <div>
         {#each answers as answer}
         {#if answer.player != name}

@@ -5,6 +5,7 @@
 	import { getGame } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
 	import PlayerList from '$lib/PlayerList.svelte';
+	import AnswerWait from './AnswerWait.svelte';
 
 	export let setGameState: (new_state: string) => void;
 	export let game_name: string | null;
@@ -12,11 +13,13 @@
 	let question: string;
 	let players: Array<string> = [];
 	let waiting_for: Array<string> = [];
+	let round_count: number;
 
 	async function readGame() {
 		getGame(game_name)
 			.then((response) => response.json())
 			.then((data) => {
+				round_count = data.rounds.length
                 question = data.rounds[data.rounds.length - 1].question;
 				players = data.players;
                 if (data.rounds[data.rounds.length - 1].guesses.length == 0) {
@@ -49,6 +52,12 @@
 </script>
 
 <main>
+	<div class="topleft">
+		{game_name}
+	</div>
+	<div class="topright">
+		Round #{round_count}
+	</div>
 	<PlayerList players={players} waiting_for={waiting_for}/>
 	<div style="padding-bottom: 100px;">
 		{question}
