@@ -152,7 +152,7 @@ function on_click(player: string) {
                 </div>
             </div>
         {:else if didYouGuessRight(player)}
-            <div class="leader-board correct" on:click={() => on_click(player)} >
+            <div class="leader-board correct">
                 {player}: {score}
                 <div>
                     "{correct_answer_map.get(player)}"

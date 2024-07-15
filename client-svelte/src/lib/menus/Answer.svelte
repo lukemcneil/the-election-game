@@ -5,14 +5,17 @@
 	import { onMount } from 'svelte';
 	import { getGame, postAnswer, postChangeQuestion, postChatGptQuestion } from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
+	import PlayerList from '$lib/PlayerList.svelte';
 
 	export let setGameState: (new_state: string) => void;
 	export let name: string | null;
 	export let game_name: string | null;
 
-	let players: Array<Player> = [];
+	let players: Array<string> = [];
+	let players_string: Array<string> = [];
 	let current_question: string | undefined = '';
 	let round_count: number;
+	let waiting_for: Array<string> = []
 
 	let answer: string = '';
 	let prompt: string = '';
@@ -37,6 +40,12 @@
 				players = data.players;
 				current_question = data.rounds[data.rounds.length - 1].question;
 				round_count = data.rounds.length;
+				waiting_for = players.filter(
+					(player) =>
+						!data.rounds[data.rounds.length - 1].answers.some(
+							(answer) => answer.player === player
+						)
+				);
 			});
 	}
 
@@ -68,14 +77,7 @@
 </script>
 
 <main>
-	<h2>Players</h2>
-	<div class="flex-container">
-		{#each players as player}
-			<div class="item shadow">
-				{player}
-			</div>
-		{/each}
-	</div>
+	<PlayerList {players} {waiting_for} />
 	<div>
 		{current_question}
 		<Button text="↻" onClick={onChangeQuestion} />

@@ -102,17 +102,21 @@ div {
 
 /* Flex container */
 .flex-container {
+  display: table;
+  margin-inline: auto;
+  text-align: center;
   display: flex; /* Use flexbox layout */
   flex-wrap: wrap;
   justify-content: space-around; /* Align items with space around */
   align-items: center; /* Center items vertically */
   padding: 10px; /* Optional: padding for spacing */
-        border-radius: 5px;
+  border-radius: 5px;
 }
+
 
 /* Flex items */
 .item {
-  background-color: #1cbcfc; /* Background color */
+  background-color: #4fcafa; /* Background color */
   padding: 10px; /* Padding around content */
   margin: 5px; /* Margin between items */
   font-family: inherit; /* Font family */
@@ -124,7 +128,7 @@ div {
 }
 
 .waiting {
-  background-color: #366679; /* Background color */
+  background-color: #387b96; /* Background color */
 }
 
 .player {

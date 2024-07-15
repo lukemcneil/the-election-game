@@ -24,6 +24,7 @@
 	let guess_player_list: Array<string> = [];
 	let guess: Guess = new Guess(name, []);
 	let baskets: Array<{ name: string; item: string }> = [];
+	let waiting_for: Array<string> = [];
 
 	async function readGame() {
 		getGame(game_name)
@@ -43,6 +44,13 @@
 						}
 					});
 				}
+				waiting_for = players.filter(
+					(player) =>
+						!data.rounds[data.rounds.length - 1].guesses.some(
+							(answer) => answer.player === player
+						)
+				);
+				console.log(waiting_for)
 			});
 	}
 
@@ -79,7 +87,7 @@
 </script>
 
 <main>
-	<PlayerList players={players} waiting_for={[]}/>
+	<PlayerList {players} {waiting_for}/>
 	<div>{question}</div>
 	<Matching {baskets} players={players.filter((e) => e !== name)} pictures={pictures} />
 	<div>
