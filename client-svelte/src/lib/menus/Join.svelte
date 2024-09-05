@@ -76,18 +76,18 @@
 		<Button text="Create Game" onClick={onClickCreateGame} />
 	</div>
 
-	<h3>Game Mode</h3>
-		<div>
-		<label>
-			<input type="radio" bind:group={game_mode} value={'text'} />
-			Text	
-		</label>
-
-		<label>
-			<input type="radio" bind:group={game_mode} value={'picture'} />
-			Pictures	
-		</label>
-		</div>
+	<!-- <h3>Game Mode</h3> -->
+	<!-- 	<div> -->
+	<!-- 	<label> -->
+	<!-- 		<input type="radio" bind:group={game_mode} value={'text'} /> -->
+	<!-- 		Text	 -->
+	<!-- 	</label> -->
+	<!---->
+	<!-- 	<label> -->
+	<!-- 		<input type="radio" bind:group={game_mode} value={'picture'} /> -->
+	<!-- 		Pictures	 -->
+	<!-- 	</label> -->
+	<!-- 	</div> -->
 	<div>
 
 	<div>
