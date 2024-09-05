@@ -164,7 +164,7 @@
 	<h2>Leader Board</h2>
 	{#each score_map as [player, score]}
 		<div
-			class="leader-board {getLeaderBoardCssClass(player)}"
+			class="{getLeaderBoardCssClass(player)}"
 			on:click={() => showCorrectAnswer(player)}
 		>
 			{player}: {score}
@@ -176,7 +176,7 @@
 
 	<h2>Who guessed you correct</h2>
 	{#each knows_score_map as [player, score]}
-		<div class="leader-board {getWhoKnowsCssClass(player)}">
+		<div class="{getWhoKnowsCssClass(player)}">
 			{player}: {score}
 		</div>
 	{/each}
@@ -189,27 +189,12 @@
 <style>
 	@import '../../app.css';
 	.correct {
-		/* border:5px solid rgb(177, 253, 177);  */
-		background-color: #74b95f;
+		background-color: rgba(116, 185, 95, 0.75);
 	}
 	.incorrect {
-		/* border:5px solid rgb(255, 128, 128);  */
-		background-color: #ca6060;
+		background-color: rgba(202, 96, 96, 0.75);
 	}
 	.me {
-		background-color: #1cbcfc;
-	}
-	.bold {
-		font-weight: bold;
-	}
-	.leader-board {
-		padding: 10px; /* Padding around content */
-		margin: 5px; /* Margin between items */
-		font-family: inherit; /* Font family */
-		font-size: 16px; /* Font size */
-		text-align: center; /* Center text */
-		flex: 1; /* Equal width distribution among items */
-		border-radius: 5px;
-		flex: 0 0 calc(25% - 10px);
+		background-color: rgba(28, 188, 252, 0.75);
 	}
 </style>
