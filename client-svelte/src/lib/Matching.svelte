@@ -100,15 +100,15 @@
 		{:else}
 		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
 		{/if}
-		<ul class="flex-container empty" on:click={(event) => onClickBasket(event, basketIndex)} >
+		<ul class="holder" on:click={(event) => onClickBasket(event, basketIndex)} >
 			{#if basket.item != ''}
 				<div>
 					{#if selected_name == basket.item}
-					<li class="highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
+					<li class="card highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
 						{basket.item}
 					</li>
 					{:else}
-					<li class="non-highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
+					<li class="card non-highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
 						{basket.item}
 					</li>
 					{/if}
@@ -125,11 +125,11 @@
 		{#each players as item, itemIndex (item)}
 			<div>
 				{#if selected_name == item}
-				<li class="highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				<li class="card highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 					{item}
 				</li>
 				{:else}
-				<li class="non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				<li class="card non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 					{item}
 				</li>
 				{/if}
@@ -141,11 +141,11 @@
 		{#each players as item, itemIndex (item)}
 			<div>
 				{#if selected_name == item}
-				<li class="highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				<li class="card highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 					{item}
 				</li>
 				{:else}
-				<li class="non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				<li class="card non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
 					{item}
 				</li>
 				{/if}
@@ -156,67 +156,48 @@
 
 <style>
 	@import '../app.css';
-  	.highlight {
-		font-weight: bold;
-		background-color: #19beff; /* Background color */
-		padding: 10px; /* Padding around content */
-		margin: 5px; /* Margin between items */
-		font-family: inherit; /* Font family */
-		font-size: 16px; /* Font size */
-		text-align: center; /* Center text */
-		flex: 1; /* Equal width distribution among items */
+	.holder {
+		display: table;
+		margin-inline: auto;
+		padding: 0.01px;
 		border-radius: 5px;
-		flex: 0 0 calc(25% - 10px);
+		min-width: 80px;
+		min-height: 55px;
+	}
+	.card {
+		font-size: 16px;
+		font-family: inherit;
+		text-align: center;
+		border-radius: 5px;
+		text-align: center;
+		font-family: inherit;
+		font-size: 16px;
+		padding: 10px;
+	}
+  	.highlight {
+		background-color: #7f4ffa;
 	}
   	.non-highlight {
-		background-color: #4fcafa; /* Background color */
-		padding: 10px; /* Padding around content */
-		margin: 5px; /* Margin between items */
-		font-family: inherit; /* Font family */
-		font-size: 16px; /* Font size */
-		text-align: center; /* Center text */
-		flex: 1; /* Equal width distribution among items */
-		border-radius: 5px;
-		flex: 0 0 calc(25% - 10px);
+		background-color: #4f75fa;
 	}
 	li:hover {
-		font-weight: bold;
-		border-radius: 5px;
-	}
-	li {
-		display: inline;
-		text-align: left;
+		background-color: #7f4ffa;
 	}
 	ul {
-		color: inherit;
-		border: solid rgb(255, 255, 255) 1px;
-		padding: 10px;
 		list-style-type: none;
-		text-align: center;
-
 	}
 	@media (prefers-color-scheme: dark) {
 		ul {
-			color: inherit;
-			border: solid rgb(255, 255, 255) 1px;
-			padding: 10px;
-			list-style-type: none;
-			text-align: center;
-
+			background-color: rgba(255,255,255,0.15);
 		}
 	}
 	@media (prefers-color-scheme: light) {
 		ul {
-			color: inherit;
-			border: solid rgb(0, 0, 0) 1px;
-			padding: 10px;
-			list-style-type: none;
-			text-align: center;
-
+			background-color: rgba(0,0,0,0.15);
 		}
 	}
 	.empty {
-		height: 34px;
+		height: 55px;
 	}
 
 </style>

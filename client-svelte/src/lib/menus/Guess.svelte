@@ -15,7 +15,7 @@
 	export let game_name: string | null;
 
 	let question: string;
-	// let players: Array<string> = ["Adam", "Luke", "Ben", "Mother"];
+	// let players: Array<string> = ["Adam", "Luke", "Ben", "Mother", "David", "Meg", "Hannah", "faMother", "wefaDavid", "lwMeg", "aef:wHannah"];
 	let players: Array<string> = [];
 	let pictures: Array<Picture> = [];
 	// let other_players: Array<string> = [];
