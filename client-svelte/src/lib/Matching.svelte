@@ -91,6 +91,15 @@
 			// selected_basket_id = null
 		}
 	}
+
+	function getCardClass(select_name, item) {
+		if (select_name == item) {
+			return "highlight"
+		} else {
+			return "non-highlight"
+		}
+	}
+
 </script>
 
 {#each baskets as basket, basketIndex (basket)}
@@ -100,59 +109,29 @@
 		{:else}
 		<img src="{localStorage.getItem("base_server_path")?.replace("api/v1/game/", "")}{geturl(basket.name)}" alt="Shut up"/>
 		{/if}
-		<ul class="holder" on:click={(event) => onClickBasket(event, basketIndex)} >
+		<ul class="shadow holder" on:click={(event) => onClickBasket(event, basketIndex)} >
 			{#if basket.item != ''}
 				<div>
-					{#if selected_name == basket.item}
-					<li class="card highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
+					<li class="shadow card {getCardClass(selected_name, basket.item)}" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
 						{basket.item}
 					</li>
-					{:else}
-					<li class="card non-highlight" on:click={(event) => onClickCard(event, basket.item, basketIndex)}>
-						{basket.item}
-					</li>
-					{/if}
 				</div>
 			{/if}
 		</ul>
 	</div>
 {/each}
 <div>
-<b>{"PLayers"}</b>
+<b>{"Players"}</b>
 </div>
-{#if players.length == 0}
-	<ul class="flex-container empty" on:click={(event) => onClickBasket(event, -1)}>
-		{#each players as item, itemIndex (item)}
-			<div>
-				{#if selected_name == item}
-				<li class="card highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
-					{item}
-				</li>
-				{:else}
-				<li class="card non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
-					{item}
-				</li>
-				{/if}
-			</div>
-		{/each}
-	</ul>
-{:else}
-	<ul class="flex-container" on:click={(event) => onClickBasket(event, -1)}>
-		{#each players as item, itemIndex (item)}
-			<div>
-				{#if selected_name == item}
-				<li class="card highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
-					{item}
-				</li>
-				{:else}
-				<li class="card non-highlight" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
-					{item}
-				</li>
-				{/if}
-			</div>
-		{/each}
-	</ul>
-{/if}
+<ul class="flex-container shadow bank" on:click={(event) => onClickBasket(event, -1)}>
+	{#each players as item, itemIndex (item)}
+		<div>
+			<li class="shadow card {getCardClass(selected_name, item)}" draggable={true} on:click={(event) => onClickCard(event, item, -1)}>
+				{item}
+			</li>
+		</div>
+	{/each}
+</ul>
 
 <style>
 	@import '../app.css';
@@ -174,14 +153,17 @@
 		font-size: 16px;
 		padding: 10px;
 	}
+	.bank {
+		min-height: 55px;
+	}
   	.highlight {
-		background-color: #7f4ffa;
+		background-color: #4fcafa;
 	}
   	.non-highlight {
-		background-color: #4f75fa;
+		background-color: #387b96;
 	}
 	li:hover {
-		background-color: #7f4ffa;
+		background-color: #4fcafa;
 	}
 	ul {
 		list-style-type: none;
