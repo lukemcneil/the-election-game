@@ -138,10 +138,10 @@
 
 	function getTileClass(index: number) {
 		if (index == 0) {
-		return ""
+			return ""
+		}
+		return "tile"
 	}
-	return "tile"
-}
 
 	function getWhoKnowsCssClass(player: string) {
 		if (people_who_guessed_you_correct.has(player)) {
