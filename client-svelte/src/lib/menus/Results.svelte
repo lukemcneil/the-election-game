@@ -113,6 +113,36 @@
 		}
 	}
 
+	function getTopClass(index: number) {
+		if (index == 0) {
+			return "top"
+		} else if (index == players.length -1) {
+			return "bottom"
+		} else {
+			return ""
+		}
+	}
+
+	function getTopClassOther(index: number) {
+		if (index == 0 && index == players.length -2) {
+		return "top bottom"
+	}
+		if (index == 0) {
+			return "top"
+		} else if (index == players.length -2) {
+			return "bottom"
+		} else {
+			return ""
+		}
+	}
+
+	function getTileClass(index: number) {
+		if (index == 0) {
+		return ""
+	}
+	return "tile"
+}
+
 	function getWhoKnowsCssClass(player: string) {
 		if (people_who_guessed_you_correct.has(player)) {
 			return 'correct';
@@ -162,9 +192,9 @@
 	</div>
 
 	<h2>Leader Board</h2>
-	{#each score_map as [player, score]}
+	{#each score_map as [player, score], index}
 		<div
-			class="{getLeaderBoardCssClass(player)}"
+			class="{getTileClass(index)} {getLeaderBoardCssClass(player)} {getTopClass(index)}"
 			on:click={() => showCorrectAnswer(player)}
 		>
 			{player}: {score}
@@ -175,8 +205,8 @@
 	{/each}
 
 	<h2>Who guessed you correct</h2>
-	{#each knows_score_map as [player, score]}
-		<div class="{getWhoKnowsCssClass(player)}">
+	{#each knows_score_map as [player, score], index}
+		<div class="{getTileClass(index)} {getWhoKnowsCssClass(player)} {getTopClassOther(index)}">
 			{player}: {score}
 		</div>
 	{/each}
@@ -196,5 +226,23 @@
 	}
 	.me {
 		background-color: rgba(28, 188, 252, 0.75);
+	}
+	@media (prefers-color-scheme: dark) {
+	.tile{
+			border-top: 1px solid #111;
+		}
+	}
+	@media (prefers-color-scheme: light) {
+	.tile{
+			border-top: 1px solid #fff;
+	}
+	}
+	.top {
+		border-top-right-radius: 50px;
+		border-top-left-radius: 50px;
+	}
+	.bottom {
+		border-bottom-right-radius: 50px;
+		border-bottom-left-radius: 50px;
 	}
 </style>
