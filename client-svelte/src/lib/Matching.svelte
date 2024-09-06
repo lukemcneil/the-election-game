@@ -170,7 +170,7 @@
 	}
 	@media (prefers-color-scheme: dark) {
 		ul {
-			background-color: rgba(255,255,255,0.15);
+			background-color: rgba(255,255,255,0.1);
 		}
 	}
 	@media (prefers-color-scheme: light) {

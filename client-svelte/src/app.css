@@ -53,10 +53,7 @@ h3 {
 @media (prefers-color-scheme: light) {
   :root {
     color: black;
-    /* background-color: rgb(169, 255, 212); */
-    background-image: radial-gradient(rgb(255, 255, 255), rgb(212, 253, 211));
-    /* color: #213547;
-    background-color: #ffffff; */
+    background-image: radial-gradient(rgb(255, 255, 255), rgb(173, 173, 173));
   }
 .loader {
   padding-top: 5px;
