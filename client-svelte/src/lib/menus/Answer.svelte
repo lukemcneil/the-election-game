@@ -86,7 +86,9 @@
 	<PlayerList {players} {waiting_for} />
 	<div>
 		{current_question}
+		{#if name == "ADAM"}
 		<Button text="↻" onClick={onChangeQuestion} />
+		{/if}
 	</div>
 	<div>
 		<InputField bind:value={answer} text="enter your answer" />
@@ -95,11 +97,13 @@
 	<div>
 	</div>
 
+		{#if name == "ADAM"}
 	<div>Change Question</div>
 	<div>
 		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
 		<Button text="↩" onClick={onMrGptQuestion} />
 	</div>
+	{/if}
 </main>
 
 <style>
