@@ -1,14 +1,14 @@
 use rand::seq::SliceRandom;
-use rocket_contrib::json;
 use reqwest;
+use rocket_contrib::json;
 use serde::Deserialize;
 use serde::Serialize;
+use std::env;
 use std::{
     fs::File,
     io::{self, BufRead, BufReader},
     path::Path,
 };
-use std::env;
 
 const DEFAULT_QUESTION: &str = "Answer the question you would have liked to be asked?";
 
@@ -73,21 +73,20 @@ impl QuestionLookup {
                 chat_completion.choices[0].message.content.clone()
                 // serde_json::to_string_pretty(&response).unwrap()
             }
-            Err(_err) => {
-                "Error".to_string()
-            }
+            Err(_err) => "Error".to_string(),
         }
     }
 }
 
 fn send_gpt_request(prompt: &str) -> Result<serde_json::Value, reqwest::Error> {
     let api_key = env::var("CHAT_GPT_TOKEN").unwrap();
-    let gpt_endpoint = "https://api.openai.com/v1/chat/completions"; 
+    let gpt_endpoint = "https://api.openai.com/v1/chat/completions";
 
-    let content = format!("Make up a question for the game loaded questions about the theme: {prompt}");
+    let content =
+        format!("Make up a question for the game loaded questions about the theme: {prompt}");
     let messages = json!([{
-            "role": "user", "content": content 
-        }]);
+        "role": "user", "content": content
+    }]);
 
     // Prepare the request payload
     let payload = json!({

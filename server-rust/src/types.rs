@@ -1,30 +1,29 @@
 mod traits;
 
+use base64::prelude::*;
+use core::str;
 use rocket::{data, response};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use core::str;
 use std::fs;
 use std::hash::Hash;
-use std::{fs::File, path::Path};
 use std::io::prelude::*;
-use base64::prelude::*;
 #[cfg(test)]
 use std::iter::FromIterator;
 use std::{
     collections::{HashMap, HashSet},
     error, fmt,
 };
+use std::{fs::File, path::Path};
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 pub(crate) type Player = String;
 pub(crate) type GameId = String;
 pub(crate) type Prompt = String;
 
-
 #[derive(Serialize, Debug, Clone)]
 pub(crate) enum GameMode {
-    Text, 
+    Text,
     Pictures,
 }
 
@@ -128,11 +127,10 @@ impl Answer {
             answer: String::from(answer),
         }
     }
-
 }
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub(crate) struct Picture {
-    pub prompt : String,
+    pub prompt: String,
     pub url: String,
 }
 
@@ -152,7 +150,6 @@ pub(crate) struct Guess {
     /// The list of guessed answers, one per player
     pub answers: HashSet<Answer>,
 }
-
 
 #[cfg(test)]
 impl Guess {
@@ -220,12 +217,15 @@ pub(crate) struct Game {
     pub(crate) rounds: Vec<Round>,
 }
 
-fn send_stable_diffusion_request(prompt: &str) -> std::result::Result<serde_json::Value, reqwest::Error> {
-    let stable_diffusion_endpoint = "https://a627-2600-1700-5b80-980-54ec-6d29-2cd7-fa0b.ngrok-free.app/sdapi/v1/txt2img"; 
+fn send_stable_diffusion_request(
+    prompt: &str,
+) -> std::result::Result<serde_json::Value, reqwest::Error> {
+    let stable_diffusion_endpoint =
+        "https://a627-2600-1700-5b80-980-54ec-6d29-2cd7-fa0b.ngrok-free.app/sdapi/v1/txt2img";
 
     // Prepare the request payload
     let payload = json!({
-        "prompt": prompt, 
+        "prompt": prompt,
         "steps": 8
     });
 
@@ -273,7 +273,6 @@ impl Game {
         Ok(())
     }
 
-
     pub(crate) fn answer(&mut self, answer: Answer, game_id: String) -> Result<()> {
         let player = &answer.player;
         // Confirm the player exists
@@ -294,7 +293,8 @@ impl Game {
                 let chat_completion: ImageCompletion = serde_json::from_value(response).unwrap();
                 let x = &chat_completion.images[0];
                 let img_buffer = base64::decode(x).unwrap();
-                data_file = File::create(Path::new(&format!("pictures/{}{}.png", game_id, player))).expect("creation failed");
+                data_file = File::create(Path::new(&format!("pictures/{}{}.png", game_id, player)))
+                    .expect("creation failed");
                 data_file.write(&img_buffer[0..]).expect("write failed");
             }
             Err(_err) => {}
@@ -310,8 +310,6 @@ impl Game {
         round.answers.replace(answer);
         Ok(())
     }
-
-    
 
     pub(crate) fn guess(&mut self, guess: Guess) -> Result<()> {
         let player = &guess.player;

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{rocket, types::PlayerData, Answer, Game, Guess, question_lookup::QuestionLookup};
+use crate::{question_lookup::QuestionLookup, rocket, types::PlayerData, Answer, Game, Guess};
 use rocket::{http::Status, local::Client};
 
 #[test]
