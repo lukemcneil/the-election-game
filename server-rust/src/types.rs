@@ -1,31 +1,31 @@
-mod traits;
-
-use base64::prelude::*;
 use core::str;
-use rocket::{data, response};
+use rocket::{
+    http::{ContentType, Status},
+    response::{self, Responder},
+    Request, Response,
+};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use std::fs;
-use std::hash::Hash;
-use std::io::prelude::*;
-#[cfg(test)]
-use std::iter::FromIterator;
+use std::io::Cursor;
+use std::{collections::BTreeMap, hash::Hash};
 use std::{
     collections::{HashMap, HashSet},
     error, fmt,
 };
-use std::{fs::File, path::Path};
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
-pub(crate) type Player = String;
-pub(crate) type GameId = String;
-pub(crate) type Prompt = String;
-
-#[derive(Serialize, Debug, Clone)]
-pub(crate) enum GameMode {
-    Text,
-    Pictures,
+impl<'r> Responder<'r, 'r> for Error {
+    fn respond_to(self, _: &Request) -> response::Result<'r> {
+        let body = BadRequest::new(self);
+        let body = serde_json::to_string(&body).expect("to BadRequest serialize");
+        Ok(Response::build()
+            .status(Status::BadRequest)
+            .header(ContentType::JSON)
+            .sized_body(None, Cursor::new(body))
+            .finalize())
+    }
 }
+
+pub(crate) type Player = String;
 
 #[derive(Serialize, Debug)]
 pub(crate) enum Error {
@@ -35,8 +35,6 @@ pub(crate) enum Error {
     PlayerNotFound,
     RoundNotInStartState,
     RoundNotInCollectingAnswersState,
-    RoundNotInCollectingGuessesState,
-    GuessedPlayerNotFound,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -57,10 +55,6 @@ impl fmt::Display for Error {
             Self::RoundNotInCollectingAnswersState => {
                 write!(f, "round not in collecting answer state")
             }
-            Self::RoundNotInCollectingGuessesState => {
-                write!(f, "round not in collecting guess state")
-            }
-            Self::GuessedPlayerNotFound => write!(f, "guessed player not found"),
         }
     }
 }
@@ -83,32 +77,9 @@ impl BadRequest {
 }
 
 #[derive(Deserialize, Serialize)]
-pub(crate) struct PromptData {
-    pub(crate) prompt: Prompt,
-}
-
-#[cfg(test)]
-impl PromptData {
-    pub(crate) fn new(prompt: &str) -> Self {
-        Self {
-            prompt: Prompt::from(prompt),
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize)]
 pub(crate) struct PlayerData {
     /// The player with which the request is associated
     pub(crate) player: Player,
-}
-
-#[cfg(test)]
-impl PlayerData {
-    pub(crate) fn new(player: &str) -> Self {
-        Self {
-            player: Player::from(player),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
@@ -116,56 +87,13 @@ pub(crate) struct Answer {
     /// The player who gave the answer
     player: Player,
     /// The answer to the question for the round
-    pub answer: String,
-}
-
-#[cfg(test)]
-impl Answer {
-    pub(crate) fn new(player: &str, answer: &str) -> Self {
-        Self {
-            player: Player::from(player),
-            answer: String::from(answer),
-        }
-    }
-}
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
-pub(crate) struct Picture {
-    pub prompt: String,
-    pub url: String,
-}
-
-impl Picture {
-    pub(crate) fn new(prompt: &str, input_url: &str) -> Self {
-        Self {
-            prompt: String::from(prompt),
-            url: String::from(input_url),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct Guess {
-    /// The player making the guess
-    pub player: Player,
-    /// The list of guessed answers, one per player
-    pub answers: HashSet<Answer>,
-}
-
-#[cfg(test)]
-impl Guess {
-    pub(crate) fn new(player: &str, guess: Vec<Answer>) -> Self {
-        Self {
-            player: Player::from(player),
-            answers: HashSet::from_iter(guess),
-        }
-    }
+    pub answer: Player,
 }
 
 #[derive(PartialEq)]
 pub(crate) enum RoundState {
     Start,
     CollectingAnswers,
-    CollectingGuesses,
     Complete,
 }
 
@@ -175,9 +103,6 @@ pub(crate) struct Round {
     question: String,
     /// The list of answers given, one per player
     pub(crate) answers: HashSet<Answer>,
-    /// The list of guesses made, one per player
-    pub(crate) guesses: HashSet<Guess>,
-    pub(crate) pictures: HashSet<Picture>,
 }
 
 impl Round {
@@ -185,8 +110,6 @@ impl Round {
         Round {
             question,
             answers: HashSet::new(),
-            guesses: HashSet::new(),
-            pictures: HashSet::new(),
         }
     }
 
@@ -195,16 +118,14 @@ impl Round {
             RoundState::Start
         } else if self.answers.len() < players {
             RoundState::CollectingAnswers
-        } else if self.guesses.len() < players {
-            RoundState::CollectingGuesses
-        } else if self.answers.len() == players && self.guesses.len() == players {
+        } else if self.answers.len() == players {
             RoundState::Complete
         } else {
             panic!("Round in unknown state")
         }
     }
 
-    fn change_question(&mut self, new_question: String) -> () {
+    fn change_question(&mut self, new_question: String) {
         self.question = new_question;
     }
 }
@@ -215,40 +136,6 @@ pub(crate) struct Game {
     pub(crate) players: HashSet<String>,
     /// The list of rounds in the game with the most recent round being the last item in the list
     pub(crate) rounds: Vec<Round>,
-}
-
-fn send_stable_diffusion_request(
-    prompt: &str,
-) -> std::result::Result<serde_json::Value, reqwest::Error> {
-    let stable_diffusion_endpoint =
-        "https://a627-2600-1700-5b80-980-54ec-6d29-2cd7-fa0b.ngrok-free.app/sdapi/v1/txt2img";
-
-    // Prepare the request payload
-    let payload = json!({
-        "prompt": prompt,
-        "steps": 8
-    });
-
-    // Send the HTTP POST request
-    let client = reqwest::blocking::Client::new();
-    let response = client
-        .post(stable_diffusion_endpoint)
-        .json(&payload)
-        .send()?;
-
-    // Check if the request was successful (status code 200)
-    if response.status().is_success() {
-        // Parse the JSON response
-        let json_response: serde_json::Value = response.json()?;
-        Ok(json_response)
-    } else {
-        // Print the error response if the request was not successful
-        let error_response: serde_json::Value = response.json()?;
-        Ok(error_response)
-        // response.error_for_status()
-        // reqwest::Error::
-        // Err(reqwest::Error::new(reqwest::StatusCode::from_u16(response.status().as_u16()).unwrap(), format!("{}", error_response)))
-    }
 }
 
 impl Game {
@@ -273,10 +160,13 @@ impl Game {
         Ok(())
     }
 
-    pub(crate) fn answer(&mut self, answer: Answer, game_id: String) -> Result<()> {
+    pub(crate) fn answer(&mut self, answer: Answer) -> Result<()> {
         let player = &answer.player;
         // Confirm the player exists
         if !self.players.contains(player) {
+            return Err(Error::PlayerNotFound);
+        }
+        if !self.players.contains(&answer.answer) {
             return Err(Error::PlayerNotFound);
         }
         // Confirm we are collecting answers for the current round
@@ -285,51 +175,8 @@ impl Game {
         {
             return Err(Error::RoundNotInCollectingAnswersState);
         }
-
-        let prompt = &answer.answer;
-        let mut data_file;
-        match send_stable_diffusion_request(prompt) {
-            Ok(response) => {
-                let chat_completion: ImageCompletion = serde_json::from_value(response).unwrap();
-                let x = &chat_completion.images[0];
-                let img_buffer = base64::decode(x).unwrap();
-                data_file = File::create(Path::new(&format!("pictures/{}{}.png", game_id, player)))
-                    .expect("creation failed");
-                data_file.write(&img_buffer[0..]).expect("write failed");
-            }
-            Err(_err) => {}
-        }
-        let input_url = &format!("pictures/{}{}.png", game_id, player);
-        let new_picture = Picture {
-            prompt: prompt.to_string(),
-            url: input_url.to_string(),
-        };
-        // let new_answer = Answer::new("ayden", data_file)
         let round = self.current_round_mut();
-        round.pictures.replace(new_picture);
         round.answers.replace(answer);
-        Ok(())
-    }
-
-    pub(crate) fn guess(&mut self, guess: Guess) -> Result<()> {
-        let player = &guess.player;
-        // Confirm the player exists
-        if !self.players.contains(player) {
-            return Err(Error::PlayerNotFound);
-        }
-        // Confirm we are adding collecting for the current round
-        if self.current_round_state() != RoundState::CollectingGuesses {
-            return Err(Error::RoundNotInCollectingGuessesState);
-        }
-        // Confirm the guesses are valid
-        for g in &guess.answers {
-            if !self.players.contains(&g.player) {
-                return Err(Error::GuessedPlayerNotFound);
-            }
-        }
-        // Add or replace the guess
-        let round = self.current_round_mut();
-        round.guesses.replace(guess);
         Ok(())
     }
 
@@ -363,21 +210,22 @@ impl Game {
         let mut scores = HashMap::new();
         let game = self.clone();
         for round in game.rounds {
-            for guess in round.guesses {
-                for answer in guess.answers {
-                    let score = scores.entry(guess.player.clone()).or_insert(0);
-                    if round.answers.contains(&answer) {
-                        *score += 1;
-                    } else {
-                        *score -= 1;
-                    }
-                }
+            let mut votes = BTreeMap::new();
+            for answer in round.answers {
+                *votes.entry(answer.answer).or_insert(0) += 1;
             }
+            let max_votes = votes.values().copied().max().unwrap_or(0);
+
+            // Add one to each player with most votes
+            votes
+                .into_iter()
+                .filter(|&(_, count)| count == max_votes)
+                .for_each(|(person, _)| *scores.entry(person).or_insert(0) += 1);
         }
         scores
     }
 
-    pub fn change_question(&mut self, new_question: String) -> () {
+    pub fn change_question(&mut self, new_question: String) {
         self.rounds
             .last_mut()
             .unwrap()
