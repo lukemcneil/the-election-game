@@ -7,7 +7,7 @@ use std::{
     path::Path,
 };
 
-const DEFAULT_QUESTION: &str = "Answer the question you would have liked to be asked?";
+const DEFAULT_QUESTION: &str = "Who is the coolest person?";
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Choice {

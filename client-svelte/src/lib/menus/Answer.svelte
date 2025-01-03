@@ -3,7 +3,12 @@
 	import InputField from '$lib/InputField.svelte';
 	import { Player } from '$lib/datatypes/player';
 	import { onMount } from 'svelte';
-	import { getGame, postAnswer, postChangeQuestion, postChatGptQuestion } from '$lib/functions/requests';
+	import {
+		getGame,
+		postAnswer,
+		postChangeQuestion,
+		postChatGptQuestion
+	} from '$lib/functions/requests';
 	import { sleep } from '$lib/functions/helper';
 	import PlayerList from '$lib/PlayerList.svelte';
 
@@ -15,12 +20,11 @@
 	let players_string: Array<string> = [];
 	let current_question: string | undefined = '';
 	let round_count: number;
-	let waiting_for: Array<string> = []
+	let waiting_for: Array<string> = [];
 
-	let answer: string = '';
 	let prompt: string = '';
 
-	function onSubmitClick() {
+	function onSubmitClick(answer) {
 		if (answer == '') {
 			console.log('you need a non-empty answer');
 			return;
@@ -42,9 +46,7 @@
 				round_count = data.rounds.length;
 				waiting_for = players.filter(
 					(player) =>
-						!data.rounds[data.rounds.length - 1].answers.some(
-							(answer) => answer.player === player
-						)
+						!data.rounds[data.rounds.length - 1].answers.some((answer) => answer.player === player)
 				);
 			});
 	}
@@ -83,27 +85,45 @@
 	<div class="topright">
 		Round #{round_count}
 	</div>
-	<PlayerList {players} {waiting_for} />
+	<!-- <PlayerList {players} {waiting_for} /> -->
 	<div>
 		{current_question}
-		{#if name == "ADAM"}
-		<Button text="↻" onClick={onChangeQuestion} />
+		{#if name == 'ADAM'}
+			<Button text="↻" onClick={onChangeQuestion} />
 		{/if}
 	</div>
-	<div>
+	<div class="flex-container">
+		{#each players as player}
+			{#if player != name}
+				<div class="waiting item shadow" on:click={(_) => onSubmitClick(player)}>
+					{player}
+				</div>
+			{/if}
+			<!-- {#if answering(player)}
+				<div class="waiting item shadow">
+					{player}
+				</div>
+			{:else}
+				<div class="item shadow">
+					{player}
+				</div>
+			{/if} -->
+		{/each}
+	</div>
+	<!-- <div>
 		<InputField bind:value={answer} text="enter your answer" />
 		<Button text="↩" onClick={onSubmitClick} />
-	</div>
-	<div>
-	</div>
+	</div> -->
 
-		{#if name == "ADAM"}
-	<div>Change Question</div>
-	<div>
-		<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
-		<Button text="↩" onClick={onMrGptQuestion} />
-	</div>
-	{/if}
+	<div></div>
+
+	<!-- {#if name == 'ADAM'}
+		<div>Change Question</div>
+		<div>
+			<InputField bind:value={prompt} text="enter Mr. GPT prompt" />
+			<Button text="↩" onClick={onMrGptQuestion} />
+		</div>
+	{/if} -->
 </main>
 
 <style>

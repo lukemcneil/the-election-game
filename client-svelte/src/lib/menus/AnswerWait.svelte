@@ -22,9 +22,9 @@
 				players = data.players;
 				current_question = data.rounds[data.rounds.length - 1].question;
 				round_count = data.rounds.length;
-				// console.log(data);
-				if (data.rounds[data.rounds.length - 1].answers.length == players.length) {
-					setGameState('guess');
+				console.log(data);
+				if (data.rounds[data.rounds.length - 1].answers.length == 0) {
+					setGameState('results');
 				} else {
 					waiting_for = players.filter(
 						(player) =>
@@ -33,7 +33,7 @@
 							)
 					);
 					// console.log(waiting_for);
-					// console.log(players)
+					// console.log(players);
 				}
 			});
 	}
@@ -50,7 +50,6 @@
 	onMount(() => {
 		getGameLoop();
 	});
-
 </script>
 
 <main>
@@ -60,7 +59,7 @@
 	<div class="topright">
 		Round #{round_count}
 	</div>
-	<PlayerList players={players} {waiting_for} />
+	<PlayerList {players} {waiting_for} />
 	<div style="padding-bottom: 100px;">
 		{current_question}
 	</div>
